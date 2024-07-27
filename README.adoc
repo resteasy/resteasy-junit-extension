@@ -1,0 +1,122 @@
+= Jakarta REST `SeBoostrap` JUnit 5 Integration
+:toc:
+
+This is a simple project which allows a unit testing for Jakarta REST endpoints using the `SeBootstrap` from
+https://jakarta.ee/specifications/restful-ws/3.1/apidocs/jakarta.ws.rs/jakarta/ws/rs/sebootstrap[Jakarta REST 3.1].
+
+== Usage
+
+To use this JUnit 5 integration you simply need to add a `@RestBootstrap(YourApplication.class)` annotation to your test. A
+`SeBoostrap.Instance` will be created and started based on the implementation you choose.
+
+=== Dependencies
+
+The first dependency you need is the testing tooling.
+
+[source,xml]
+----
+<dependencies>
+    <dependency>
+        <groupId>dev.resteasy.testing.tools</groupId>
+        <artifactId>junit-testing-tools</artifactId>
+        <version>${version.dev.resteasy.testing.tools</version>
+    </dependency>
+</dependencies>
+----
+
+Next you need to define an implementation. This project chose not to be implementation specific and should work with
+any Jakarta REST 3.1+ implementation.
+
+.RESTEasy Example
+[source,xml]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-bom</artifactId>
+            <version>${version.org.jboss.resteasy}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit</groupId>
+            <artifactId>junit-bom</artifactId>
+            <version>${version.org.junit}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+<dependencies>
+    <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-core-spi</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-client</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-undertow-cdi</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+----
+
+=== Examples
+
+.Simple Test
+[source,java]
+----
+@RestBootstrap(value = SimpleTest.TestApplication.class)
+public class SimpleTest {
+
+    @Inject
+    private Client client;
+
+    @Inject
+    private UriBuilder uriBuilder;
+
+    @Test
+    public void invokeResource(final UriBuilder builder) {
+        try (Client client = ClientBuilder.newClient()) {
+            final String result = client.target(builder.path("/test/echo/"))
+                    .request()
+                    .post(Entity.text("Hello"), String.class);
+            Assertions.assertEquals("Hello", result);
+        }
+    }
+
+    @Test
+    public void invokeResourceOnInjectedClient() {
+        final String result = client.target(uriBuilder.path("/test/echo/"))
+                .request()
+                    .post(Entity.text("Hello"), String.class);
+        Assertions.assertEquals("Hello", result);
+    }
+
+    @ApplicationPath("/test")
+    public static class TestApplication extends Application {
+        @Override
+        public Set<Class<?>> getClasses() {
+            return Set.of(EchoResource.class);
+        }
+    }
+    @Path("/echo")
+    public static class EchoResource {
+        @POST
+        public String echo(String text) {
+            return text;
+        }
+    }
+}
+----

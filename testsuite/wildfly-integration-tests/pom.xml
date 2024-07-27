@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright The RESTEasy Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.resteasy.junit.extension</groupId>
+        <artifactId>testsuite</artifactId>
+        <version>1.0.0.Alpha1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>wildfly-integration-tests</artifactId>
+    <name>RESTEasy JUnit 5: WildFly Integration Tests</name>
+
+    <properties>
+        <!-- Dependency versions -->
+        <version.org.wildfly.arquillian>5.1.0.Beta4</version.org.wildfly.arquillian>
+
+        <!-- Plugin versions -->
+        <version.org.wildfly.plugin>5.0.0.Final</version.org.wildfly.plugin>
+
+        <!-- Provisioning properties -->
+        <jboss.home>${project.build.directory}${file.separator}wildfly</jboss.home>
+        <galleon.fork.embedded>true</galleon.fork.embedded>
+        <galleon.log.time>true</galleon.log.time>
+        <skip.provisioning>false</skip.provisioning>
+
+        <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
+        <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>
+        <version.org.wildfly/>
+
+        <wildfly.channel.manifest.groupId>org.wildfly.channels</wildfly.channel.manifest.groupId>
+        <wildfly.channel.manifest.artifactId>wildfly-ee</wildfly.channel.manifest.artifactId>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.wildfly.arquillian</groupId>
+                <artifactId>wildfly-arquillian-bom</artifactId>
+                <version>${version.org.wildfly.arquillian}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Used for logging in tests -->
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+            <version>3.0.6.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- SeBootstrap TCK dependencies -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-undertow-cdi</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <!-- WildFly Arquillian uses an older version which is required. -->
+                <exclusion>
+                    <groupId>org.jboss.threads</groupId>
+                    <artifactId>jboss-threads</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.junit5</groupId>
+            <artifactId>arquillian-junit5-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.arquillian</groupId>
+            <artifactId>wildfly-arquillian-container-managed</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.logmanager</groupId>
+                    <artifactId>jboss-logmanager</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <jboss.home>${jboss.home}</jboss.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>${version.org.wildfly.plugin}</version>
+                <executions>
+                    <execution>
+                        <id>server-provisioning</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>provision</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.provisioning}</skip>
+                            <provisioning-dir>${jboss.home}</provisioning-dir>
+                            <galleon-options>
+                                <jboss-fork-embedded>${galleon.fork.embedded}</jboss-fork-embedded>
+                            </galleon-options>
+                            <feature-packs>
+                                <feature-pack>
+                                    <groupId>${server.test.feature.pack.groupId}</groupId>
+                                    <artifactId>${server.test.feature.pack.artifactId}</artifactId>
+                                    <version>${version.org.wildfly}</version>
+                                </feature-pack>
+                            </feature-packs>
+                            <channels>
+                                <!-- If the server.version is blank the newest version of WildFly will be used. Otherwise, be
+                                     explicit.
+                                 -->
+                                <channel>
+                                    <manifest>
+                                        <groupId>${wildfly.channel.manifest.groupId}</groupId>
+                                        <artifactId>${wildfly.channel.manifest.artifactId}</artifactId>
+                                        <version>${version.org.wildfly}</version>
+                                    </manifest>
+                                </channel>
+                            </channels>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles/>
+
+</project>
