@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Application;
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@ApplicationPath("/test")
+@ApplicationPath("/")
 public class TestApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {

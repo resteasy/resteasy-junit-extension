@@ -60,7 +60,8 @@ public class InjectionProducerExtension
     public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext)
             throws ParameterResolutionException {
         for (InjectionProducer producer : producers) {
-            if (producer.canInject(parameterContext.getParameter().getType())) {
+            if (producer.canInject(extensionContext, parameterContext.getParameter().getType(), parameterContext.getParameter()
+                    .getAnnotations())) {
                 return true;
             }
         }
@@ -73,7 +74,8 @@ public class InjectionProducerExtension
         // Find the producer which can provide this parameter
         InjectionProducer injectionProducer = null;
         for (InjectionProducer producer : producers) {
-            if (producer.canInject(parameterContext.getParameter().getType())) {
+            if (producer.canInject(extensionContext, parameterContext.getParameter().getType(), parameterContext.getParameter()
+                    .getAnnotations())) {
                 injectionProducer = producer;
                 break;
             }
@@ -125,7 +127,7 @@ public class InjectionProducerExtension
             // Find the producer which can provide this parameter
             InjectionProducer injectionProducer = null;
             for (InjectionProducer producer : producers) {
-                if (producer.canInject(field.getType())) {
+                if (producer.canInject(context, field.getType(), field.getAnnotations())) {
                     injectionProducer = producer;
                     break;
                 }

@@ -99,7 +99,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource {
             holder = new BootstrapHolder();
             holder.bootstrap = bootstrap.get();
             final Class<? extends ConfigurationProvider> factoryType = holder.bootstrap.configFactory();
-            final ConfigurationProvider factory = InjectionUtil.createProvider(factoryType);
+            final ConfigurationProvider factory = Extensions.createProvider(factoryType);
             holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration())
                     .toCompletableFuture()
                     .get(holder.bootstrap.timeout(), holder.bootstrap.timoutUnit());

@@ -20,11 +20,13 @@ public interface InjectionProducer {
     /**
      * Indicates the type can be produced from this producer.
      *
-     * @param clazz the type to check
+     * @param context    the current extension context
+     * @param clazz      the type to check
+     * @param qualifiers the qualifiers, if any, for the field or parameter
      *
      * @return {@code true} if this producer can create this type, otherwise {@code false}
      */
-    boolean canInject(Class<?> clazz);
+    boolean canInject(ExtensionContext context, Class<?> clazz, Annotation... qualifiers);
 
     /**
      * Creates the object which can be injected into a static field, an instance field or a parameter.

@@ -6,8 +6,7 @@
 package dev.resteasy.junit.extension.extensions;
 
 import java.lang.annotation.Annotation;
-
-import jakarta.ws.rs.SeBootstrap;
+import java.net.URI;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.kohsuke.MetaInfServices;
@@ -15,25 +14,22 @@ import org.kohsuke.MetaInfServices;
 import dev.resteasy.junit.extension.api.InjectionProducer;
 
 /**
- * A producer for injecting a {@link SeBootstrap.Configuration}.
- *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @MetaInfServices
-public class ConfigurationProducer implements InjectionProducer {
+public class UriProducer implements InjectionProducer {
     @Override
     public boolean canInject(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
-        return SeBootstrap.Configuration.class.isAssignableFrom(clazz);
+        return URI.class.isAssignableFrom(clazz);
     }
 
     @Override
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
-        if (SeBootstrap.Configuration.class.isAssignableFrom(clazz)) {
+        if (URI.class.isAssignableFrom(clazz)) {
             return InstanceManager.getInstance(context)
-                    .map(im -> im.instance().configuration())
+                    .map(im -> im.instance().configuration().baseUri())
                     .orElse(null);
         }
-        throw new IllegalArgumentException(
-                String.format("Type %s is not assignable to %s", clazz.getName(), SeBootstrap.Configuration.class));
+        throw new IllegalArgumentException(String.format("Type %s is not assignable to %s", clazz.getName(), URI.class));
     }
 }
