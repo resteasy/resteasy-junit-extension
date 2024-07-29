@@ -20,7 +20,7 @@ import dev.resteasy.junit.extension.api.InjectionProducer;
 @MetaInfServices
 public class UriBuilderProducer implements InjectionProducer {
     @Override
-    public boolean canInject(final Class<?> clazz) {
+    public boolean canInject(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
         return UriBuilder.class.isAssignableFrom(clazz);
     }
 

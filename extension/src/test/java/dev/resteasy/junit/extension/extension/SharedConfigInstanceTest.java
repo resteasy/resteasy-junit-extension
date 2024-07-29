@@ -21,7 +21,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @RestBootstrap(TestApplication.class)
-public class SharedInstanceTest {
+public class SharedConfigInstanceTest {
     private static final AtomicReference<Configuration> CONFIGURATION = new AtomicReference<>();
 
     @Inject
@@ -31,7 +31,7 @@ public class SharedInstanceTest {
     private Configuration instanceConfiguration;
     private final Configuration constructorConfiguration;
 
-    public SharedInstanceTest(final Configuration constructorConfiguration) {
+    public SharedConfigInstanceTest(final Configuration constructorConfiguration) {
         this.constructorConfiguration = constructorConfiguration;
     }
 
