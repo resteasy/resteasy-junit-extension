@@ -81,10 +81,8 @@ any Jakarta REST 3.1+ implementation.
 public class SimpleTest {
 
     @Inject
-    private Client client;
-
-    @Inject
-    private UriBuilder uriBuilder;
+    @RequestPath("/test/echo")
+    private WebTarget webTarget;
 
     @Test
     public void invokeResource(final UriBuilder builder) {
@@ -98,8 +96,7 @@ public class SimpleTest {
 
     @Test
     public void invokeResourceOnInjectedClient() {
-        final String result = client.target(uriBuilder.path("/test/echo/"))
-                .request()
+        final String result = webTarget.request()
                     .post(Entity.text("Hello"), String.class);
         Assertions.assertEquals("Hello", result);
     }
@@ -120,3 +117,65 @@ public class SimpleTest {
     }
 }
 ----
+
+=== Injection
+
+You can inject some types into your tests. For fields you use the `@jakarta.inject.Inject` annotation. Constructor and
+method parameters do not require the `@Inject` annotation. The following types can be injected.
+
+* `jakarta.ws.rs.SeBootstrap.Configuration`
++
+The configuration from the `SeBoostrap.Instance` that was started.
+* `jakarta.ws.rs.client.Client`
++
+A REST Client. This can have a qualifier of `@RestClientConfig` which returns a `RestClientBuilderProvider` and allows
+the configuration to be overridden for the client.
+* `jakarta.ws.rs.core.UriBuilder`
++
+Injects a URI builder. Given this is a mutable builder, this should likely only be injected as a method parameter.
+* `java.net.URI`
++
+The base URI for `SeBootstrap.Instance` that was started.
+* `jakarta.ws.rs.client.WebTarget`
++
+This can be used with the `@RequestPath` qualifier. It creates a `WebTarget` from a configured client.
+
+
+[cols="3,^1,^1,^1,3a"]
+|===
+|Type |Field |Parameter |Constructor |Qualifiers
+
+|`jakarta.ws.rs.SeBootstrap.Configuration`
+|X
+|X
+|X
+|
+
+|`jakarta.ws.rs.client.Client`
+|X
+|X
+|X
+|
+* `@RestClientConfig` (optional)
+
+|`jakarta.ws.rs.core.UriBuilder`
+|X
+|X
+|X
+|
+
+|`java.net.URI`
+|X
+|X
+|X
+|
+
+|`jakarta.ws.rs.client.WebTarget`
+|X
+|X
+|X
+|
+* `@RequestPath` (optional)
+* `@RestClientConfig` (optional)
+
+|===
