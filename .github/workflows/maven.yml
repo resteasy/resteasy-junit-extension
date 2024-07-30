@@ -16,6 +16,7 @@ on:
     paths:
       - '**/pom.xml'
       - '**/src/**'
+  workflow_dispatch:
 
 # Only run the latest job
 concurrency:
