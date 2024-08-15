@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 import dev.resteasy.junit.extension.extensions.InjectionProducerExtension;
 import dev.resteasy.junit.extension.extensions.SeBootstrapExtension;
+import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
 
 /**
  * An annotation which starts a {@link jakarta.ws.rs.SeBootstrap.Instance} for unit testing.
@@ -38,7 +39,8 @@ import dev.resteasy.junit.extension.extensions.SeBootstrapExtension;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith({
         SeBootstrapExtension.class,
-        InjectionProducerExtension.class
+        InjectionProducerExtension.class,
+        UriBuilderParameterResolver.class,
 })
 public @interface RestBootstrap {
 
