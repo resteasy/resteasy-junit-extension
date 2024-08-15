@@ -159,7 +159,7 @@ This can be used with the `@RequestPath` qualifier. It creates a `WebTarget` fro
 * `@RestClientConfig` (optional)
 
 |`jakarta.ws.rs.core.UriBuilder`
-|X
+|
 |X
 |X
 |
