@@ -26,7 +26,7 @@ import dev.resteasy.junit.extension.api.RestClientBuilderProvider;
  */
 @Inherited
 @Documented
-@Target(ElementType.FIELD)
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestClientConfig {
 
