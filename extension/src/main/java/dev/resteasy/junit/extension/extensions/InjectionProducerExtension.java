@@ -5,10 +5,8 @@
 
 package dev.resteasy.junit.extension.extensions;
 
-import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
-import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
-
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ServiceLoader;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -24,8 +22,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.commons.util.ExceptionUtils;
-import org.junit.platform.commons.util.ReflectionUtils;
+import org.junit.platform.commons.support.AnnotationSupport;
 
 import dev.resteasy.junit.extension.api.InjectionProducer;
 
@@ -109,18 +106,18 @@ public class InjectionProducerExtension
     }
 
     private void injectStaticFields(final ExtensionContext context, final Class<?> testClass) {
-        injectFields(context, null, testClass, ReflectionUtils::isStatic);
+        injectFields(context, null, testClass, (f) -> Modifier.isStatic(f.getModifiers()));
     }
 
     private void injectInstanceFields(final ExtensionContext context, final Object instance) {
-        injectFields(context, instance, instance.getClass(), ReflectionUtils::isNotStatic);
+        injectFields(context, instance, instance.getClass(), (f) -> !Modifier.isStatic(f.getModifiers()));
     }
 
     private void injectFields(final ExtensionContext context, final Object testInstance, final Class<?> testClass,
             final Predicate<Field> predicate) {
 
-        findAnnotatedFields(testClass, Inject.class, predicate).forEach(field -> {
-            if (ReflectionUtils.isFinal(field)) {
+        AnnotationSupport.findAnnotatedFields(testClass, Inject.class, predicate).forEach(field -> {
+            if (Modifier.isFinal(field.getModifiers())) {
                 throw new ExtensionConfigurationException(
                         String.format("Field '%s' cannot be final for injecting a REST client.", field));
             }
@@ -142,9 +139,15 @@ public class InjectionProducerExtension
                 if (value instanceof AutoCloseable) {
                     resources.add((AutoCloseable) value);
                 }
-                makeAccessible(field).set(testInstance, value);
+                if (field.trySetAccessible()) {
+                    field.set(testInstance, value);
+                } else {
+                    throw new ParameterResolutionException(
+                            String.format("Could not make field %s accessible for injection.", field));
+                }
             } catch (Throwable e) {
-                throw ExceptionUtils.throwAsUncheckedException(e);
+                throw new ParameterResolutionException(
+                        String.format("Could not make field %s accessible for injection.", field));
             }
         });
     }
