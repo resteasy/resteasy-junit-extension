@@ -49,6 +49,7 @@ public class SeBootstrapTest {
     private Client client;
 
     @Inject
+    @RequestPath("/echo")
     private URI uri;
 
     @Inject
@@ -66,9 +67,9 @@ public class SeBootstrapTest {
     }
 
     @Test
-    public void invokeResource(final URI uri) {
+    public void invokeResource(@RequestPath("echo") final URI uri) {
         try (Client client = ClientBuilder.newClient()) {
-            final String result = client.target(UriBuilder.fromUri(uri).path("/echo"))
+            final String result = client.target(uri)
                     .request()
                     .post(Entity.text("Hello"), String.class);
             Assertions.assertEquals("Hello", result);
@@ -87,7 +88,7 @@ public class SeBootstrapTest {
 
     @Test
     public void invokeResourceOnInjectedClient() {
-        final String result = client.target(UriBuilder.fromUri(uri).path("/echo"))
+        final String result = client.target(uri)
                 .request()
                 .post(Entity.text("Hello"), String.class);
         Assertions.assertEquals("Hello", result);
@@ -95,7 +96,7 @@ public class SeBootstrapTest {
 
     @Test
     public void staticInvokeResourceOnInjectedClient() {
-        final String result = CLIENT.target(UriBuilder.fromUri(uri).path("/echo"))
+        final String result = CLIENT.target(uri)
                 .request()
                 .post(Entity.text("Hello"), String.class);
         Assertions.assertEquals("Hello", result);
