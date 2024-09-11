@@ -17,7 +17,7 @@
 
     <groupId>dev.resteasy.junit.extension</groupId>
     <artifactId>resteasy-junit-extension-parent</artifactId>
-    <version>1.0.0.Alpha2</version>
+    <version>1.0.0.Alpha3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>RESTEasy JUnit 5: Parent</name>
     <description/>
