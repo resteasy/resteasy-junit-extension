@@ -146,8 +146,11 @@ public class InjectionProducerExtension
                             String.format("Could not make field %s accessible for injection.", field));
                 }
             } catch (Throwable e) {
+                if (e instanceof ParameterResolutionException) {
+                    throw (ParameterResolutionException) e;
+                }
                 throw new ParameterResolutionException(
-                        String.format("Could not make field %s accessible for injection.", field));
+                        String.format("Could not make field %s accessible for injection.", field), e);
             }
         });
     }
