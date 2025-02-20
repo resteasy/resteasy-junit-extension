@@ -22,7 +22,7 @@
         <version.org.wildfly.arquillian>5.1.0.Beta9</version.org.wildfly.arquillian>
 
         <!-- Plugin versions -->
-        <version.org.wildfly.plugin>5.1.1.Final</version.org.wildfly.plugin>
+        <version.org.wildfly.plugin>5.1.2.Final</version.org.wildfly.plugin>
 
         <!-- Provisioning properties -->
         <jboss.home>${project.build.directory}${file.separator}wildfly</jboss.home>
