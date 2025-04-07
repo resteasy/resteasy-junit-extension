@@ -19,7 +19,7 @@
 
     <properties>
         <!-- Dependency versions -->
-        <version.org.wildfly.arquillian>5.1.0.Beta10</version.org.wildfly.arquillian>
+        <version.org.wildfly.arquillian>5.1.0.Beta11</version.org.wildfly.arquillian>
 
         <!-- Plugin versions -->
         <version.org.wildfly.plugin>5.1.2.Final</version.org.wildfly.plugin>
