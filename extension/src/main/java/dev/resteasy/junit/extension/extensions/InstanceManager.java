@@ -23,7 +23,7 @@ import dev.resteasy.junit.extension.api.ConfigurationProvider;
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-class InstanceManager implements ExtensionContext.Store.CloseableResource {
+class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoCloseable {
     private static final String MANGER_KEY = "InstanceManager";
 
     private final ReadWriteLock lock;
