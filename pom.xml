@@ -9,9 +9,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.resteasy.tools</groupId>
-        <artifactId>resteasy-parent</artifactId>
-        <version>3</version>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>49</version>
         <relativePath/>
     </parent>
 
@@ -71,6 +71,14 @@
         <version.org.jboss.resteasy>6.2.12.Final</version.org.jboss.resteasy>
         <version.org.junit>5.13.1</version.org.junit>
         <version.org.kohsuke.metainf-services>1.11</version.org.kohsuke.metainf-services>
+
+        <!-- Plugin versions -->
+        <version.formatter.maven.plugin>2.23.0</version.formatter.maven.plugin>
+        <version.impsort.maven.plugin>1.9.0</version.impsort.maven.plugin>
+        <version.central.publishing.maven.plugin>0.7.0</version.central.publishing.maven.plugin>
+
+        <!-- Configuration properties -->
+        <skipFormatting>false</skipFormatting>
     </properties>
 
     <dependencyManagement>
@@ -133,10 +141,55 @@
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
+                <version>${version.formatter.maven.plugin}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>dev.resteasy.tools</groupId>
+                        <artifactId>ide-config</artifactId>
+                        <version>3</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <!-- store outside of target to speed up formatting when mvn clean is used -->
+                    <cachedir>.cache</cachedir>
+                    <configFile>eclipse-code-formatter.xml</configFile>
+                    <configXmlFile>resteasy-xml.properties</configXmlFile>
+                    <includeResources>true</includeResources>
+                    <lineEnding>LF</lineEnding>
+                    <removeTrailingWhitespace>true</removeTrailingWhitespace>
+                    <skip>${skipFormatting}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>format</id>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>net.revelc.code</groupId>
                 <artifactId>impsort-maven-plugin</artifactId>
+                <version>${version.impsort.maven.plugin}</version>
+                <configuration>
+                    <!-- store outside of target to speed up formatting when mvn clean is used -->
+                    <cachedir>.cache</cachedir>
+                    <groups>java.,javax.,jakarta.,org.,com.</groups>
+                    <staticGroups>*</staticGroups>
+                    <skip>${skipFormatting}</skip>
+                    <removeUnused>true</removeUnused>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sort-imports</id>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -172,6 +225,114 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- Maven Central properties -->
+                <repo.sonatype.url>https://central.sonatype.com</repo.sonatype.url>
+                <sonatype.server.id>central</sonatype.server.id>
+            </properties>
+
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>${sonatype.server.id}</id>
+                    <url>${repo.sonatype.url}</url>
+                </snapshotRepository>
+                <repository>
+                    <id>${sonatype.server.id}</id>
+                    <url>${repo.sonatype.url}</url>
+                </repository>
+            </distributionManagement>
+
+            <build>
+                <plugins>
+                    <!-- Semantically ordered -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <configuration>
+                            <rules>
+                                <requireReleaseDeps>
+                                    <message>No Snapshots Allowed!</message>
+                                </requireReleaseDeps>
+                            </rules>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalOptions>
+                                <additionalOption>-html5</additionalOption>
+                            </additionalOptions>
+                            <detectLinks>true</detectLinks>
+                            <doclint>none</doclint>
+                            <failOnError>false</failOnError>
+                            <show>public</show>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- Prevent gpg from using pinentry programs -->
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${version.central.publishing.maven.plugin}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>${sonatype.server.id}</publishingServerId>
+                            <!-- Exclude tests from being deployed -->
+                            <excludeArtifacts>
+                                <excludeArtifact>testsuite</excludeArtifact>
+                                <excludeArtifact>wildfly-integration-tests</excludeArtifact>
+                            </excludeArtifacts>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
