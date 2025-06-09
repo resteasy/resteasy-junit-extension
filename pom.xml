@@ -20,7 +20,7 @@
     <version>1.0.0.Alpha3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>RESTEasy JUnit 5: Parent</name>
-    <description/>
+    <description>RESTEasy JUnit 5 Parent</description>
 
     <url>https://resteasy.dev</url>
     <inceptionYear>2024</inceptionYear>

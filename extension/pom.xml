@@ -15,7 +15,7 @@
     </parent>
     <artifactId>resteasy-junit-extension</artifactId>
     <name>RESTEasy JUnit 5: Extension</name>
-    <description/>
+    <description>A JUnit 5 extension that manages a Jakarta REST SeBootstrap instance for testing.</description>
 
     <dependencies>
         <dependency>
