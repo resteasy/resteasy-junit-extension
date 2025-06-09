@@ -77,7 +77,7 @@ class Extensions {
         return store.getOrComputeIfAbsent(key, s -> new ClientStore(CLIENT_KEY, builder.build()), ClientStore.class).client;
     }
 
-    private static class ClientStore implements ExtensionContext.Store.CloseableResource {
+    private static class ClientStore implements ExtensionContext.Store.CloseableResource, AutoCloseable {
         private final String key;
         private final Client client;
 
