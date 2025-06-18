@@ -75,7 +75,7 @@
         <!-- Plugin versions -->
         <version.formatter.maven.plugin>2.23.0</version.formatter.maven.plugin>
         <version.impsort.maven.plugin>1.9.0</version.impsort.maven.plugin>
-        <version.central.publishing.maven.plugin>0.7.0</version.central.publishing.maven.plugin>
+        <version.central.publishing.maven.plugin>0.8.0</version.central.publishing.maven.plugin>
 
         <!-- Configuration properties -->
         <skipFormatting>false</skipFormatting>
