@@ -68,7 +68,7 @@
         <!-- Dependency Versions, keep in alphabetical order -->
         <version.jakarta.ee>10.0.0</version.jakarta.ee>
         <version.org.jboss.logging>3.6.0.Final</version.org.jboss.logging>
-        <version.org.jboss.resteasy>6.2.12.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>7.0.1.Final</version.org.jboss.resteasy>
         <version.org.junit>5.13.4</version.org.junit>
         <version.org.kohsuke.metainf-services>1.11</version.org.kohsuke.metainf-services>
 
