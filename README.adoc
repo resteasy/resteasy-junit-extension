@@ -80,7 +80,7 @@ any Jakarta REST 3.1+ implementation.
 @RestBootstrap(value = SimpleTest.TestApplication.class)
 public class SimpleTest {
 
-    @Inject
+    @RestResource
     @RequestPath("/test/echo")
     private WebTarget webTarget;
 
@@ -120,8 +120,8 @@ public class SimpleTest {
 
 === Injection
 
-You can inject some types into your tests. For fields you use the `@jakarta.inject.Inject` annotation. Constructor and
-method parameters do not require the `@Inject` annotation. The following types can be injected.
+You can inject some types into your tests. For fields you use the `@RestResource` annotation. Constructor and
+method parameters do not require the `@RestResource` annotation. The following types can be injected.
 
 * `jakarta.ws.rs.SeBootstrap.Configuration`
 +

@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.RestResource;
 
 /**
  * Tests that Arquillian works with WildFly and the SeBootstrap. An instance of SeBootstrap is started and listens on
@@ -49,9 +50,9 @@ public class ArquillianIntegrationTest {
     @ArquillianResource
     private URI uri;
 
-    // Injected for client usage by the RESTEasy JUnit 5 extension when @RunAsClient used. Injected by CDI when used
+    // Injected for client usage by the RESTEasy JUnit extension when @RunAsClient used. Injected by CDI when used
     // in the container.
-    @SuppressWarnings("CdiInjectionPointsInspection")
+    @RestResource
     @Inject
     private Client client;
 

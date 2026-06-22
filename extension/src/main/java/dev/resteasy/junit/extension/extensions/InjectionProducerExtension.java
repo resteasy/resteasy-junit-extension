@@ -12,8 +12,6 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Predicate;
 
-import jakarta.inject.Inject;
-
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -24,11 +22,12 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.support.AnnotationSupport;
 
+import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.api.InjectionProducer;
 
 /**
- * An extension for using {@linkplain InjectionProducer producers} to inject fields annotated with {@link Inject} and
- * method or constructor parameters.
+ * An extension for using {@linkplain InjectionProducer producers} to inject fields annotated with
+ * {@link RestResource} and method or constructor parameters.
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
@@ -116,10 +115,10 @@ public class InjectionProducerExtension
     private void injectFields(final ExtensionContext context, final Object testInstance, final Class<?> testClass,
             final Predicate<Field> predicate) {
 
-        AnnotationSupport.findAnnotatedFields(testClass, Inject.class, predicate).forEach(field -> {
+        AnnotationSupport.findAnnotatedFields(testClass, RestResource.class, predicate).forEach(field -> {
             if (Modifier.isFinal(field.getModifiers())) {
                 throw new ExtensionConfigurationException(
-                        String.format("Field '%s' cannot be final for injecting a REST client.", field));
+                        String.format("Field '%s' cannot be final for injecting a REST resource.", field));
             }
             // Find the producer which can provide this parameter
             InjectionProducer injectionProducer = null;

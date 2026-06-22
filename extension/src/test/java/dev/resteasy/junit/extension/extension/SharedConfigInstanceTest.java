@@ -7,7 +7,6 @@ package dev.resteasy.junit.extension.extension;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.SeBootstrap.Configuration;
 
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
 /**
@@ -24,10 +24,10 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 public class SharedConfigInstanceTest {
     private static final AtomicReference<Configuration> CONFIGURATION = new AtomicReference<>();
 
-    @Inject
+    @RestResource
     private static Configuration STATIC_CONFIGURATION;
 
-    @Inject
+    @RestResource
     private Configuration instanceConfiguration;
     private final Configuration constructorConfiguration;
 

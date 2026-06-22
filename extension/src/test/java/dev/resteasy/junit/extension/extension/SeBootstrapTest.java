@@ -7,7 +7,6 @@ package dev.resteasy.junit.extension.extension;
 
 import java.net.URI;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -20,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import dev.resteasy.junit.extension.annotations.RequestPath;
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
@@ -35,24 +35,24 @@ public class SeBootstrapTest {
         }
     }
 
-    @Inject
+    @RestResource
     private static Client CLIENT;
 
-    @Inject
+    @RestResource
     private static URI STATIC_URI;
 
-    @Inject
+    @RestResource
     @RequestPath("/echo")
     private static WebTarget TARGET;
 
-    @Inject
+    @RestResource
     private Client client;
 
-    @Inject
+    @RestResource
     @RequestPath("/echo")
     private URI uri;
 
-    @Inject
+    @RestResource
     @RequestPath("/echo")
     private WebTarget target;
 

@@ -5,7 +5,6 @@
 
 package dev.resteasy.junit.extension.extension;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
 /**
@@ -24,13 +24,13 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 @RestBootstrap(TestApplication.class)
 public class ClientTest {
 
-    @Inject
+    @RestResource
     private static SeBootstrap.Configuration CONFIGURATION;
 
-    @Inject
+    @RestResource
     private static Client STATIC_CLIENT;
 
-    @Inject
+    @RestResource
     private Client instanceClient;
 
     private final Client constructorClient;

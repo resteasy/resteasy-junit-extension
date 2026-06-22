@@ -14,7 +14,7 @@ import jakarta.ws.rs.Path;
 @Path("/echo")
 public class EchoResource {
     @POST
-    public String echo(String text) {
+    public String echo(final String text) {
         return text;
     }
 }
