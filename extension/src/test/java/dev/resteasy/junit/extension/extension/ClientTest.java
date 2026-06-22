@@ -35,18 +35,18 @@ public class ClientTest {
 
     private final Client constructorClient;
 
-    public ClientTest(final Client constructorClient) {
+    public ClientTest(@RestResource final Client constructorClient) {
         this.constructorClient = constructorClient;
     }
 
     @BeforeAll
-    public static void checkBeforeAll(final Client client) {
+    public static void checkBeforeAll(@RestResource final Client client) {
         // The client should be available and ready to use
         assertClientAvailable(client);
     }
 
     @AfterAll
-    public static void checkAfterAll(final Client client) {
+    public static void checkAfterAll(@RestResource final Client client) {
         // The client should be available and ready to use
         assertClientAvailable(client);
     }
@@ -57,7 +57,7 @@ public class ClientTest {
     }
 
     @Test
-    public void checkParameter(final Client client) {
+    public void checkParameter(@RestResource final Client client) {
         assertClientAvailable(client);
     }
 

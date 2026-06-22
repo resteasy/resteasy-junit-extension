@@ -8,6 +8,8 @@ package dev.resteasy.junit.extension.extensions;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 
+import jakarta.ws.rs.core.UriBuilder;
+
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.kohsuke.MetaInfServices;
@@ -29,7 +31,8 @@ public class UriProducer implements InjectionProducer {
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
         if (URI.class.isAssignableFrom(clazz)) {
             final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
-            final var uriBuilder = InstanceManager.getInstance(context)
+            @SuppressWarnings("resource")
+            final UriBuilder uriBuilder = InstanceManager.getInstance(context)
                     .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"))
                     .instance()
                     .configuration()
@@ -39,6 +42,6 @@ public class UriProducer implements InjectionProducer {
             }
             return uriBuilder.build();
         }
-        throw new IllegalArgumentException(String.format("Type %s is not assignable to %s", clazz.getName(), URI.class));
+        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), URI.class));
     }
 }

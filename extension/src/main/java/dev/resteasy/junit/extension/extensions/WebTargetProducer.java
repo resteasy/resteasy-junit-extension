@@ -9,8 +9,10 @@ import java.lang.annotation.Annotation;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RequestPath;
@@ -36,11 +38,11 @@ public class WebTargetProducer implements InjectionProducer {
         if (WebTarget.class.isAssignableFrom(clazz)) {
             final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
             @SuppressWarnings("resource")
-            final Client client = Extensions.findOrCreateClient(context, restClient);
+            final InstanceManager instanceManager = InstanceManager.getInstance(context)
+                    .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"));
+            final Client client = instanceManager.getOrCreateClient(restClient);
             final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
-            final var uriBuilder = InstanceManager.getInstance(context)
-                    .orElseThrow(() -> new RuntimeException("Could not find associated SeBootstrap instance"))
-                    .instance()
+            final UriBuilder uriBuilder = instanceManager.instance()
                     .configuration()
                     .baseUriBuilder();
             if (requestPath != null) {
@@ -48,6 +50,6 @@ public class WebTargetProducer implements InjectionProducer {
             }
             return client.target(uriBuilder);
         }
-        throw new IllegalArgumentException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
+        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
     }
 }

@@ -16,15 +16,19 @@ import java.net.URI;
 import jakarta.ws.rs.SeBootstrap;
 
 /**
- * Qualifies the injection point for a {@link jakarta.ws.rs.client.WebTarget} with a relative path with a prefix of
- * {@link SeBootstrap.Configuration#baseUriBuilder()}.
+ * Qualifies the injection point for a {@link jakarta.ws.rs.client.WebTarget} or {@link URI} with a relative path
+ * with a prefix of {@link SeBootstrap.Configuration#baseUriBuilder()}.
  *
  * <pre>
  * &#x40;RestBootstrap(OrderApplication.class)
  * public class OrderTest {
- *     &#x40;Inject
+ *     &#x40;RestResource
  *     &#x40;RequestPath("/orders")
  *     private WebTarget ordersTarget;
+ *
+ *     &#x40;RestResource
+ *     &#x40;RequestPath("/orders")
+ *     private URI ordersUri;
  *
  *     &#x40;Test
  *     public void listOrders() throws Exception {
@@ -32,6 +36,11 @@ import jakarta.ws.rs.SeBootstrap;
  *             Assertions.assertEquals(200, response.getStatus(),
  *                     () -> String.format("Failed to get orders: %s", response.readEntity(String.class)));
  *         }
+ *     }
+ *
+ *     &#x40;Test
+ *     public void getOrdersUri(&#x40;RestResource &#x40;RequestPath("/orders/123") URI orderUri) {
+ *         Assertions.assertTrue(orderUri.toString().endsWith("/orders/123"));
  *     }
  * }
  * </pre>

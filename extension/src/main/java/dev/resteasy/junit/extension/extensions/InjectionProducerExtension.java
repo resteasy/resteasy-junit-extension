@@ -12,7 +12,6 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -32,9 +31,8 @@ import dev.resteasy.junit.extension.api.InjectionProducer;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public class InjectionProducerExtension
-        implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback, ParameterResolver {
+        implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
 
-    private final BlockingDeque<AutoCloseable> resources = new LinkedBlockingDeque<>();
     private final ServiceLoader<InjectionProducer> producers;
 
     public InjectionProducerExtension() {
@@ -55,9 +53,16 @@ public class InjectionProducerExtension
     @Override
     public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext)
             throws ParameterResolutionException {
+        if (!parameterContext.isAnnotated(RestResource.class)) {
+            return false;
+        }
+        // Resolve lexical context for the parameter
+        final Class<?> declaringClass = parameterContext.getDeclaringExecutable().getDeclaringClass();
+        final ExtensionContext lexicalContext = resolveLexicalContext(extensionContext, declaringClass);
+
         for (InjectionProducer producer : producers) {
-            if (producer.canInject(extensionContext, parameterContext.getParameter().getType(), parameterContext.getParameter()
-                    .getAnnotations())) {
+            if (producer.canInject(lexicalContext, parameterContext.getParameter().getType(),
+                    parameterContext.getParameter().getAnnotations())) {
                 return true;
             }
         }
@@ -67,40 +72,30 @@ public class InjectionProducerExtension
     @Override
     public Object resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        // Find the producer which can provide this parameter
-        InjectionProducer injectionProducer = null;
-        for (InjectionProducer producer : producers) {
-            if (producer.canInject(extensionContext, parameterContext.getParameter().getType(), parameterContext.getParameter()
-                    .getAnnotations())) {
-                injectionProducer = producer;
-                break;
-            }
+        if (!parameterContext.isAnnotated(RestResource.class)) {
+            return null;
         }
+        // Resolve lexical context for the parameter
+        final Class<?> declaringClass = parameterContext.getDeclaringExecutable().getDeclaringClass();
+        final ExtensionContext lexicalContext = resolveLexicalContext(extensionContext, declaringClass);
+
+        InjectionProducer injectionProducer = getProducer(lexicalContext, parameterContext.getParameter().getType(),
+                parameterContext.getParameter().getAnnotations());
+
         if (injectionProducer == null) {
             return null;
         }
+
         try {
-            final Object value = injectionProducer.produce(extensionContext, parameterContext.getParameter()
-                    .getType(), parameterContext.getParameter().getAnnotations());
-            if (value instanceof AutoCloseable) {
-                resources.add((AutoCloseable) value);
-            }
+            // Pass the lexical context to the producer!
+            final Object value = injectionProducer.produce(lexicalContext, parameterContext.getParameter().getType(),
+                    parameterContext.getParameter().getAnnotations());
+
+            trackResource(lexicalContext, value);
             return value;
         } catch (Throwable e) {
             throw new ParameterResolutionException(
                     String.format("Failed to resolve parameter '%s'.", parameterContext.getParameter()), e);
-        }
-    }
-
-    @Override
-    public void afterAll(final ExtensionContext context) {
-        AutoCloseable closeable;
-        while ((closeable = resources.pollFirst()) != null) {
-            try {
-                closeable.close();
-            } catch (Throwable t) {
-                // TODO (jrp) should we capture these?
-            }
         }
     }
 
@@ -135,9 +130,7 @@ public class InjectionProducerExtension
             }
             try {
                 final Object value = injectionProducer.produce(context, field.getType(), field.getAnnotations());
-                if (value instanceof AutoCloseable) {
-                    resources.add((AutoCloseable) value);
-                }
+                trackResource(context, value);
                 if (field.trySetAccessible()) {
                     field.set(testInstance, value);
                 } else {
@@ -152,5 +145,59 @@ public class InjectionProducerExtension
                         String.format("Could not make field %s accessible for injection.", field), e);
             }
         });
+    }
+
+    private InjectionProducer getProducer(ExtensionContext context, Class<?> type,
+            java.lang.annotation.Annotation[] annotations) {
+        for (InjectionProducer producer : producers) {
+            if (producer.canInject(context, type, annotations)) {
+                return producer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Walks up the context tree to find the context that strictly matches the class
+     * where the parameter or field was written in the source code.
+     */
+    private ExtensionContext resolveLexicalContext(final ExtensionContext runtimeContext, final Class<?> declaringClass) {
+        ExtensionContext current = runtimeContext;
+        while (current != null) {
+            if (current.getTestClass().isPresent() && current.getTestClass().get().equals(declaringClass)) {
+                return current;
+            }
+            current = current.getParent().orElse(null);
+        }
+        // Fallback to runtime context if somehow not found in the hierarchy
+        return runtimeContext;
+    }
+
+    /**
+     * Tracks resources in the specific context's Store so they are closed exactly when THAT context ends.
+     */
+    private void trackResource(final ExtensionContext context, final Object value) {
+        if (value instanceof AutoCloseable) {
+            ResourceTracker tracker = ClassContext.getStore(context).getOrComputeIfAbsent(ResourceTracker.class,
+                    k -> new ResourceTracker(), ResourceTracker.class);
+            tracker.resources.add((AutoCloseable) value);
+        }
+    }
+
+    // Completely replaces the AfterAllCallback, guaranteeing thread-safe, context-isolated teardowns
+    private static class ResourceTracker implements ExtensionContext.Store.CloseableResource, AutoCloseable {
+        private final BlockingDeque<AutoCloseable> resources = new LinkedBlockingDeque<>();
+
+        @Override
+        public void close() {
+            AutoCloseable closeable;
+            while ((closeable = resources.pollFirst()) != null) {
+                try {
+                    closeable.close();
+                } catch (Throwable t) {
+                    // Ignored during teardown
+                }
+            }
+        }
     }
 }

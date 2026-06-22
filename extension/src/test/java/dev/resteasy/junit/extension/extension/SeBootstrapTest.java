@@ -67,7 +67,7 @@ public class SeBootstrapTest {
     }
 
     @Test
-    public void invokeResource(@RequestPath("echo") final URI uri) {
+    public void invokeResource(@RestResource @RequestPath("echo") final URI uri) {
         try (Client client = ClientBuilder.newClient()) {
             final String result = client.target(uri)
                     .request()
@@ -77,7 +77,7 @@ public class SeBootstrapTest {
     }
 
     @Test
-    public void invokeResource(final UriBuilder builder) {
+    public void invokeResource(@RestResource final UriBuilder builder) {
         try (Client client = ClientBuilder.newClient()) {
             final String result = client.target(builder.path("/echo"))
                     .request()
@@ -103,7 +103,7 @@ public class SeBootstrapTest {
     }
 
     @Test
-    public void invokeWebTarget(@RequestPath("/echo") final WebTarget target) {
+    public void invokeWebTarget(@RestResource @RequestPath("/echo") final WebTarget target) {
         final String result = target.request()
                 .post(Entity.text("Hello"), String.class);
         Assertions.assertEquals("Hello", result);

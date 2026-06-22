@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import jakarta.ws.rs.client.Client;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
@@ -29,8 +30,12 @@ public class RestClientProducer implements InjectionProducer {
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
         if (Client.class.isAssignableFrom(clazz)) {
             final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
-            return Extensions.findOrCreateClient(context, restClient);
+            // Get the InstanceManager for this test class and ask it for a Client
+            @SuppressWarnings("resource")
+            final InstanceManager instanceManager = InstanceManager.getInstance(context)
+                    .orElseThrow(() -> new ParameterResolutionException("No SeBootstrap instance available"));
+            return instanceManager.getOrCreateClient(restClient);
         }
-        throw new IllegalArgumentException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
+        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
     }
 }
