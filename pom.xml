@@ -41,9 +41,9 @@
         <developer>
             <id>jamezp</id>
             <name>James R Perkins</name>
-            <email>jperkins@redhat.com</email>
-            <organization>Red Hat, Inc.</organization>
-            <organizationUrl>https://redhat.com</organizationUrl>
+            <email>jperkins@ibm.com</email>
+            <organization>IBM</organization>
+            <organizationUrl>https://resteasy.dev</organizationUrl>
         </developer>
     </developers>
 
