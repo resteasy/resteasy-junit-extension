@@ -14,8 +14,8 @@
         <version>1.0.0.Final-SNAPSHOT</version>
     </parent>
     <artifactId>resteasy-junit-extension</artifactId>
-    <name>RESTEasy JUnit 5: Extension</name>
-    <description>A JUnit 5 extension that manages a Jakarta REST SeBootstrap instance for testing.</description>
+    <name>RESTEasy JUnit: Extension</name>
+    <description>A JUnit extension that manages a Jakarta REST SeBootstrap instance for testing.</description>
 
     <dependencies>
         <dependency>

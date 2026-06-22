@@ -16,7 +16,7 @@
     <artifactId>testsuite</artifactId>
     <packaging>pom</packaging>
 
-    <name>RESTEasy JUnit 5: Test Suite</name>
+    <name>RESTEasy JUnit: Test Suite</name>
 
     <modules>
         <module>wildfly-integration-tests</module>
