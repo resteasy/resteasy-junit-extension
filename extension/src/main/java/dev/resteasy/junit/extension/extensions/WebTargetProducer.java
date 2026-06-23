@@ -17,7 +17,7 @@ import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RequestPath;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
-import dev.resteasy.junit.extension.api.InjectionProducer;
+import dev.resteasy.junit.extension.api.RestResourceProducer;
 
 /**
  * Allows injecting a {@link WebTarget}.
@@ -25,7 +25,7 @@ import dev.resteasy.junit.extension.api.InjectionProducer;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @MetaInfServices
-public class WebTargetProducer implements InjectionProducer {
+public class WebTargetProducer implements RestResourceProducer {
 
     @Override
     public boolean canInject(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {

@@ -19,7 +19,7 @@ import jakarta.ws.rs.core.Application;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
-import dev.resteasy.junit.extension.extensions.InjectionProducerExtension;
+import dev.resteasy.junit.extension.extensions.RestResourceProducerExtension;
 import dev.resteasy.junit.extension.extensions.SeBootstrapExtension;
 import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
 
@@ -39,7 +39,7 @@ import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith({
         SeBootstrapExtension.class,
-        InjectionProducerExtension.class,
+        RestResourceProducerExtension.class,
         UriBuilderParameterResolver.class,
 })
 public @interface RestBootstrap {

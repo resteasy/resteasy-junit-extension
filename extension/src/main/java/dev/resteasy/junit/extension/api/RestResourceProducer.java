@@ -35,7 +35,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * </p>
  *
  * <pre>
- * public class DataSourceProducer implements InjectionProducer {
+ * public class DataSourceProducer implements RestResourceProducer {
  *     &#64;Override
  *     public boolean canInject(ExtensionContext context, Class&lt;?&gt; clazz, Annotation... qualifiers) {
  *         return DataSource.class.isAssignableFrom(clazz);
@@ -71,7 +71,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <h2>Registration</h2>
  * <p>
  * Custom producers must be registered via {@link java.util.ServiceLoader} by creating a file
- * {@code META-INF/services/dev.resteasy.junit.extension.api.InjectionProducer} containing the fully-qualified class
+ * {@code META-INF/services/dev.resteasy.junit.extension.api.RestResourceProducer} containing the fully-qualified class
  * name of your implementation.
  * </p>
  *
@@ -84,7 +84,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * @see dev.resteasy.junit.extension.annotations.RestResource
  * @since 1.0.0
  */
-public interface InjectionProducer {
+public interface RestResourceProducer {
 
     /**
      * Determines whether this producer can inject the specified type.

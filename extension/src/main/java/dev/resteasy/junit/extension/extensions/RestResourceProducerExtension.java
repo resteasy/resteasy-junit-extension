@@ -22,21 +22,21 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.support.AnnotationSupport;
 
 import dev.resteasy.junit.extension.annotations.RestResource;
-import dev.resteasy.junit.extension.api.InjectionProducer;
+import dev.resteasy.junit.extension.api.RestResourceProducer;
 
 /**
- * An extension for using {@linkplain InjectionProducer producers} to inject fields annotated with
+ * An extension for using {@linkplain RestResourceProducer producers} to inject fields annotated with
  * {@link RestResource} and method or constructor parameters.
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-public class InjectionProducerExtension
+public class RestResourceProducerExtension
         implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
 
-    private final ServiceLoader<InjectionProducer> producers;
+    private final ServiceLoader<RestResourceProducer> producers;
 
-    public InjectionProducerExtension() {
-        producers = ServiceLoader.load(InjectionProducer.class);
+    public RestResourceProducerExtension() {
+        producers = ServiceLoader.load(RestResourceProducer.class);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class InjectionProducerExtension
         final Class<?> declaringClass = parameterContext.getDeclaringExecutable().getDeclaringClass();
         final ExtensionContext lexicalContext = resolveLexicalContext(extensionContext, declaringClass);
 
-        for (InjectionProducer producer : producers) {
+        for (RestResourceProducer producer : producers) {
             if (producer.canInject(lexicalContext, parameterContext.getParameter().getType(),
                     parameterContext.getParameter().getAnnotations())) {
                 return true;
@@ -79,16 +79,16 @@ public class InjectionProducerExtension
         final Class<?> declaringClass = parameterContext.getDeclaringExecutable().getDeclaringClass();
         final ExtensionContext lexicalContext = resolveLexicalContext(extensionContext, declaringClass);
 
-        InjectionProducer injectionProducer = getProducer(lexicalContext, parameterContext.getParameter().getType(),
+        RestResourceProducer producer = getProducer(lexicalContext, parameterContext.getParameter().getType(),
                 parameterContext.getParameter().getAnnotations());
 
-        if (injectionProducer == null) {
+        if (producer == null) {
             return null;
         }
 
         try {
             // Pass the lexical context to the producer!
-            final Object value = injectionProducer.produce(lexicalContext, parameterContext.getParameter().getType(),
+            final Object value = producer.produce(lexicalContext, parameterContext.getParameter().getType(),
                     parameterContext.getParameter().getAnnotations());
 
             trackResource(lexicalContext, value);
@@ -116,20 +116,20 @@ public class InjectionProducerExtension
                         String.format("Field '%s' cannot be final for injecting a REST resource.", field));
             }
             // Find the producer which can provide this parameter
-            InjectionProducer injectionProducer = null;
-            for (InjectionProducer producer : producers) {
+            RestResourceProducer resourceProducer = null;
+            for (RestResourceProducer producer : producers) {
                 if (producer.canInject(context, field.getType(), field.getAnnotations())) {
-                    injectionProducer = producer;
+                    resourceProducer = producer;
                     break;
                 }
             }
-            if (injectionProducer == null) {
+            if (resourceProducer == null) {
                 throw new ExtensionConfigurationException(
-                        String.format("Could not find InjectionProducer for field '%s' of type %s.", field, field.getType()
+                        String.format("Could not find RestResourceProducer for field '%s' of type %s.", field, field.getType()
                                 .getName()));
             }
             try {
-                final Object value = injectionProducer.produce(context, field.getType(), field.getAnnotations());
+                final Object value = resourceProducer.produce(context, field.getType(), field.getAnnotations());
                 trackResource(context, value);
                 if (field.trySetAccessible()) {
                     field.set(testInstance, value);
@@ -147,9 +147,9 @@ public class InjectionProducerExtension
         });
     }
 
-    private InjectionProducer getProducer(ExtensionContext context, Class<?> type,
+    private RestResourceProducer getProducer(ExtensionContext context, Class<?> type,
             java.lang.annotation.Annotation[] annotations) {
-        for (InjectionProducer producer : producers) {
+        for (RestResourceProducer producer : producers) {
             if (producer.canInject(context, type, annotations)) {
                 return producer;
             }

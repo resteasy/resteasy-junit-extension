@@ -16,7 +16,7 @@
  * {@link jakarta.ws.rs.SeBootstrap.Configuration} for test instances</li>
  * <li>{@link dev.resteasy.junit.extension.api.RestClientBuilderProvider RestClientBuilderProvider} - Provides custom
  * {@link jakarta.ws.rs.client.ClientBuilder} configuration</li>
- * <li>{@link dev.resteasy.junit.extension.api.InjectionProducer InjectionProducer} - Enables injection of custom types
+ * <li>{@link dev.resteasy.junit.extension.api.RestResourceProducer RestResourceProducer} - Enables injection of custom types
  * into test classes</li>
  * </ul>
  *
@@ -49,7 +49,7 @@
  *
  * <pre>
  * &#64;MetaInfServices
- * public class DatabaseProducer implements InjectionProducer {
+ * public class DatabaseProducer implements RestResourceProducer {
  *     &#64;Override
  *     public boolean canInject(ExtensionContext context, Class&lt;?&gt; clazz, Annotation... qualifiers) {
  *         return DataSource.class.isAssignableFrom(clazz);

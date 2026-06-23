@@ -12,7 +12,7 @@ import jakarta.ws.rs.SeBootstrap;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.kohsuke.MetaInfServices;
 
-import dev.resteasy.junit.extension.api.InjectionProducer;
+import dev.resteasy.junit.extension.api.RestResourceProducer;
 
 /**
  * A producer for injecting a {@link SeBootstrap.Configuration}.
@@ -20,7 +20,7 @@ import dev.resteasy.junit.extension.api.InjectionProducer;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @MetaInfServices
-public class ConfigurationProducer implements InjectionProducer {
+public class ConfigurationProducer implements RestResourceProducer {
     @Override
     public boolean canInject(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
         return SeBootstrap.Configuration.class.isAssignableFrom(clazz);

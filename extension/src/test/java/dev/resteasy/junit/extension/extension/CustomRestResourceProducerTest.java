@@ -16,30 +16,30 @@ import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestResource;
-import dev.resteasy.junit.extension.api.InjectionProducer;
+import dev.resteasy.junit.extension.api.RestResourceProducer;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
 /**
- * Tests custom InjectionProducer SPI using JUnit's EngineTestKit.
+ * Tests custom RestResourceProducer SPI using JUnit's EngineTestKit.
  * <p>
- * This test demonstrates how to implement a custom {@link InjectionProducer} that can inject custom types
+ * This test demonstrates how to implement a custom {@link RestResourceProducer} that can inject custom types
  * into test classes. In a real application, producers must be registered via ServiceLoader
- * in {@code META-INF/services/dev.resteasy.junit.extension.api.InjectionProducer}.
+ * in {@code META-INF/services/dev.resteasy.junit.extension.api.RestResourceProducer}.
  * </p>
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-public class CustomInjectionProducerTest {
+public class CustomRestResourceProducerTest {
 
     /**
      * Example custom producer that injects String values.
      * <p>
      * In a real application, you would register this in
-     * {@code META-INF/services/dev.resteasy.junit.extension.api.InjectionProducer} like:
+     * {@code META-INF/services/dev.resteasy.junit.extension.api.RestResourceProducer} like:
      * </p>
      */
     @MetaInfServices
-    public static class CustomStringProducer implements InjectionProducer {
+    public static class CustomStringProducer implements RestResourceProducer {
 
         @Override
         public boolean canInject(final ExtensionContext context, final Class<?> clazz,
