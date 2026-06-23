@@ -24,9 +24,10 @@
 
     <url>https://resteasy.dev</url>
     <inceptionYear>2024</inceptionYear>
+
     <organization>
-        <name>Red Hat, Inc.</name>
-        <url>https://redhat.com</url>
+        <name>RESTEasy Community</name>
+        <url>https://resteasy.dev</url>
     </organization>
 
     <licenses>
@@ -50,6 +51,7 @@
     <modules>
         <module>extension</module>
         <module>testsuite</module>
+        <module>docs</module>
     </modules>
 
     <scm>
@@ -65,7 +67,7 @@
     </issueManagement>
 
     <properties>
-        <!-- Compile to Java SE 17 -->
+        <!-- Compile to Java SE 11 -->
         <maven.compiler.release>11</maven.compiler.release>
 
         <!-- Dependency Versions, keep in alphabetical order -->
@@ -163,6 +165,12 @@
                             <version>${version.org.kohsuke.metainf-services}</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>dev.resteasy.junit.extension.extensions</excludePackageNames>
                 </configuration>
             </plugin>
             <plugin>

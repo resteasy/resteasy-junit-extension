@@ -1,0 +1,439 @@
+= RESTEasy JUnit Extension
+:author: RESTEasy Team
+:version-label: Version
+:doctype: book
+:license: Apache License v2.0
+:source-highlighter: highlight.js
+:highlightjs-theme: github
+:toc: left
+:toclevels: 3
+:sectnums:
+:icons: font
+:experimental:
+
+// Project-specific attributes
+:javadoc-url: ../apidocs
+
+[abstract]
+== Abstract
+
+RESTEasy JUnit Extension is a JUnit extension that provides seamless integration for testing Jakarta REST applications
+using `SeBootstrap`. It manages the Jakarta REST server lifecycle, provides resource injection, and offers a clean API
+for writing REST API tests.
+
+== Quick Start
+
+=== Maven Dependency
+
+Add the extension to your test dependencies:
+
+[source,xml]
+----
+<dependency>
+    <groupId>dev.resteasy.junit</groupId>
+    <artifactId>resteasy-junit-extension</artifactId>
+    <version>{project.version}</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- Jakarta REST implementation (e.g., RESTEasy) -->
+<dependency>
+    <groupId>org.jboss.resteasy</groupId>
+    <artifactId>resteasy-undertow-cdi</artifactId>
+    <version>${version.resteasy}</version>
+    <scope>test</scope>
+</dependency>
+----
+
+=== Basic Example
+
+[source,java]
+----
+@RestBootstrap(MyApplication.class)
+public class HelloResourceTest {
+
+    @RestResource
+    private Client client;
+
+    @RestResource
+    private URI baseUri;
+
+    @Test
+    public void testHello() {
+        Response response = client.target(baseUri)
+            .path("/hello")
+            .request()
+            .get();
+
+        assertEquals(200, response.getStatus());
+        assertEquals("Hello, World!", response.readEntity(String.class));
+    }
+}
+----
+
+That's it! The extension automatically:
+
+* Starts a `SeBootstrap` instance with your Application
+* Injects a configured REST client
+* Provides the server's base URI
+* Shuts everything down after tests complete
+
+== Core Concepts
+
+=== `@RestBootstrap` Annotation
+
+The `@RestBootstrap` annotation marks a test class to start a Jakarta REST `SeBootstrap` instance:
+
+[source,java]
+----
+@RestBootstrap(MyApplication.class)
+public class MyTest {
+    // Tests run with SeBootstrap instance
+}
+----
+
+**Attributes:**
+
+* `value` - The Jakarta REST `Application` class to bootstrap (required)
+* `configFactory` - Optional `ConfigurationProvider` for custom server configuration
+* `timeout` - Startup/shutdown timeout (default: 10 seconds)
+* `timeoutUnit` - Timeout time unit (default: `SECONDS`)
+
+=== Resource Injection
+
+The extension can inject several types into your tests using the `@RestResource` annotation:
+
+[cols="1,3"]
+|===
+|Type |Description
+
+|`jakarta.ws.rs.client.Client`
+|REST client for making HTTP requests
+
+|`jakarta.ws.rs.client.WebTarget`
+|WebTarget, optionally qualified with `@RequestPath`
+
+|`java.net.URI`
+|Server base URI, optionally qualified with `@RequestPath`
+
+|`jakarta.ws.rs.core.UriBuilder`
+|URI builder for constructing URIs
+
+|`jakarta.ws.rs.SeBootstrap.Configuration`
+|The SeBootstrap configuration
+|===
+
+**Injection Points:**
+
+* Static fields
+* Instance fields
+* Constructor parameters
+* Method parameters (`@BeforeAll`, `@BeforeEach`, `@AfterEach`, `@AfterAll`, `@Test`)
+
+[source,java]
+----
+@RestBootstrap(MyApp.class)
+public class InjectionExamplesTest {
+
+    // Static field injection
+    @RestResource
+    private static Client staticClient;
+
+    // Instance field injection
+    @RestResource
+    private URI baseUri;
+
+    // Constructor injection
+    public InjectionExamplesTest(@RestResource Client client) {
+        // ...
+    }
+
+    // Lifecycle method injection
+    @BeforeEach
+    public void setUp(@RestResource WebTarget target) {
+        // ...
+    }
+
+    // Test method injection
+    @Test
+    public void testSomething(@RestResource Client client,
+                              @RestResource URI uri) {
+        // ...
+    }
+}
+----
+
+== Advanced Features
+
+=== Path Qualifiers with `@RequestPath`
+
+Use `@RequestPath` to inject URIs or WebTargets pointing to specific paths:
+
+[source,java]
+----
+@RestBootstrap(MyApp.class)
+public class PathQualifiersTest {
+
+    @RestResource
+    @RequestPath("/users")
+    private WebTarget usersTarget;
+
+    @RestResource
+    @RequestPath("/orders")
+    private URI ordersUri;
+
+    @Test
+    public void testUsers() {
+        // usersTarget already points to /users
+        Response response = usersTarget.request().get();
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testOrders(@RestResource @RequestPath("/orders/123") URI orderUri) {
+        // orderUri points to /orders/123
+        Response response = client.target(orderUri).request().get();
+        assertEquals(200, response.getStatus());
+    }
+}
+----
+
+**Path Formats:**
+
+* Both `/path` and `path` work (leading slash is optional)
+* Nested paths work: `/api/v1/users`
+
+=== Custom Client Configuration
+
+Use `@RestClientConfig` to provide custom client configuration:
+
+[source,java]
+----
+public class CustomTimeoutProvider implements RestClientBuilderProvider {
+    @Override
+    public ClientBuilder getClientBuilder() {
+        return ClientBuilder.newBuilder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS);
+    }
+}
+
+@RestBootstrap(MyApp.class)
+public class CustomClientTest {
+
+    @RestResource
+    @RestClientConfig(CustomTimeoutProvider.class)
+    private Client customClient;
+
+    @RestResource
+    private Client defaultClient;  // Uses default configuration
+}
+----
+
+=== Custom Server Configuration
+
+Customize the `SeBootstrap` server configuration with `ConfigurationProvider`:
+
+[source,java]
+----
+public class CustomPortProvider implements ConfigurationProvider {
+    @Override
+    public SeBootstrap.Configuration getConfiguration() {
+        return SeBootstrap.Configuration.builder()
+            .port(9090)
+            .host("localhost")
+            .build();
+    }
+}
+
+@RestBootstrap(value = MyApp.class, configFactory = CustomPortProvider.class)
+public class CustomPortTest {
+    // Tests run on port 9090
+}
+----
+
+=== Nested Test Classes
+
+Nested test classes can inherit or override the parent's `@RestBootstrap`:
+
+[source,java]
+----
+@RestBootstrap(MyApp.class)
+public class OuterTest {
+
+    @RestResource
+    private static Client outerClient;
+
+    @Test
+    public void testOuter() {
+        // Uses MyApp on default port
+    }
+
+    @Nested
+    class InheritedTests {
+        // Inherits parent's @RestBootstrap - shares same instance
+
+        @Test
+        public void testInherited(@RestResource Client client) {
+            // Same client as outerClient
+        }
+    }
+
+    @Nested
+    @RestBootstrap(value = MyApp.class, configFactory = SecondInstanceConfigurationProvider.class)
+    class IsolatedTests {
+        // Gets its own SeBootstrap instance with different config
+
+        @Test
+        public void testIsolated(@RestResource Client client) {
+            // Different client than outerClient
+        }
+    }
+}
+----
+
+== Extension Points
+
+=== Custom Resource Producers
+
+Implement `RestResourceProducer` to inject custom types:
+
+[source,java]
+----
+public class DataSourceProducer implements RestResourceProducer {
+
+    @Override
+    public boolean canInject(ExtensionContext context, Class<?> clazz,
+                             Annotation... qualifiers) {
+        return DataSource.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public Object produce(ExtensionContext context, Class<?> clazz,
+                          Annotation... qualifiers) {
+        // Create and return your DataSource
+        return createDataSource();
+    }
+}
+----
+
+**Registration:**
+
+Create `META-INF/services/dev.resteasy.junit.extension.api.RestResourceProducer`:
+
+----
+com.example.DataSourceProducer
+----
+
+**Usage:**
+
+[source,java]
+----
+@RestBootstrap(MyApp.class)
+public class DatabaseTest {
+
+    @RestResource
+    private DataSource dataSource;  // Injected by custom producer
+
+    @Test
+    public void testDatabase() {
+        // Use dataSource...
+    }
+}
+----
+
+=== Global Configuration Providers
+
+Register a global `ConfigurationProvider` or `RestClientBuilderProvider` via ServiceLoader to apply configuration to all
+tests without specifying it on each annotation.
+
+Create `META-INF/services/dev.resteasy.junit.extension.api.ConfigurationProvider`:
+
+----
+com.example.GlobalPortProvider
+----
+
+Now all tests without an explicit `configFactory` will use `GlobalPortProvider`.
+
+== Examples
+
+Complete working examples can be found in the link:https://github.com/resteasy/resteasy-junit-extension/tree/main/extension/src/test/java/dev/resteasy/junit/extension/extension[test suite]. The test suite demonstrates:
+
+* **`ClientInstanceTest`** - Client injection and instance scoping across all injection points
+* **`SeBootstrapTest`** - Basic SeBootstrap usage with various injection types
+* **`WebTargetTest`** - WebTarget with `@RequestPath` in different formats
+* **`UriInjectionTest`** - URI injection with and without `@RequestPath`
+* **`UriBuilderTest`** - UriBuilder injection and mutability
+* **`SharedConfigInstanceTest`** - Configuration injection and nested test behavior
+* **`CustomInjectionProducerTest`** - Custom `RestResourceProducer` implementation
+
+== Configuration Reference
+
+=== System Properties
+
+The extension does not use system properties directly - configuration is done via `ConfigurationProvider` implementations.
+
+=== SeBootstrap Configuration
+
+All `SeBootstrap.Configuration` options are available:
+
+[cols="1,3,1"]
+|===
+|Property |Description |Default
+
+|`protocol`
+|Protocol (http/https)
+|http
+
+|`host`
+|Server host
+|localhost
+
+|`port`
+|Server port
+|Random available port
+
+|`rootPath`
+|Application root path
+|/
+|===
+
+Refer to the link:{javadoc-url}/dev/resteasy/junit/extension/api/ConfigurationProvider.html[ConfigurationProvider Javadoc]
+for implementation details.
+
+== Frequently Asked Questions
+
+**Q: Can I use this with any Jakarta REST implementation?**
+
+A: Yes! The extension uses standard Jakarta REST 3.1+ `SeBootstrap`. Any compliant implementation (RESTEasy, Jersey, etc.) that supports `SeBootstrap` will work.
+
+**Q: How do I test CDI-enabled applications?**
+
+A: Use a Jakarta REST implementation that supports CDI, like `resteasy-undertow-cdi`. The extension uses `@RestResource` instead of `@jakarta.inject.Inject` to avoid conflicts with CDI in your application code.
+
+**Q: Can I run tests in parallel?**
+
+A: Yes, but each test class gets its own `SeBootstrap` instance. Parallel execution of methods within a single class is not recommended since they share the same server instance.
+
+**Q: How do I enable debug logging?**
+
+A: Set the `dev.resteasy.junit.extension` logger to DEBUG level in your logging framework configuration.
+
+**Q: Why am I getting "No SeBootstrap instance available"?**
+
+A: Ensure your test class is annotated with `@RestBootstrap` and that you have a Jakarta REST implementation with `SeBootstrap` support on your test classpath.
+
+**Q: Can nested test classes have different configurations?**
+
+A: Yes! Add `@RestBootstrap` with a custom `configFactory` to the nested class. However, note that some Jakarta REST implementations (like RESTEasy with CDI) may not support running multiple `SeBootstrap` instances simultaneously due to singleton container limitations.
+
+== Related Documentation
+
+* link:{javadoc-url}/index.html[Javadoc API Documentation] - Complete API reference
+* link:https://jakarta.ee/specifications/restful-ws/[Jakarta REST Specification] - Jakarta REST specification
+* link:https://docs.resteasy.dev/[RESTEasy Documentation] - RESTEasy user guide
+* link:https://docs.junit.org/[JUnit User Guide] - JUnit documentation
+
+== License
+
+This project is licensed under the Apache License v2.0. See the LICENSE file for details.
