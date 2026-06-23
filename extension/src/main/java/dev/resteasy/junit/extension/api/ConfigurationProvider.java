@@ -9,6 +9,8 @@ import java.util.ServiceLoader;
 
 import jakarta.ws.rs.SeBootstrap.Configuration;
 
+import org.junit.jupiter.api.extension.ExtensionContext;
+
 /**
  * Provides custom {@link jakarta.ws.rs.SeBootstrap.Configuration} for test instances.
  * <p>
@@ -77,13 +79,20 @@ public interface ConfigurationProvider {
      * or root path.
      * </p>
      *
+     * @param context the JUnit extension context
+     *
      * @return the configuration to use for starting the SeBootstrap instance, must not be {@code null}
      */
-    default Configuration getConfiguration() {
+    default Configuration getConfiguration(final ExtensionContext context) {
         final ServiceLoader<ConfigurationProvider> loader = ServiceLoader.load(ConfigurationProvider.class);
         if (loader.iterator().hasNext()) {
-            return loader.iterator().next().getConfiguration();
+            return loader.iterator().next().getConfiguration(context);
         }
-        return Configuration.builder().build();
+        final Configuration.Builder builder = Configuration.builder();
+        context.getConfigurationParameter("dev.resteasy.junit.extension.protocol").ifPresent(builder::protocol);
+        context.getConfigurationParameter("dev.resteasy.junit.extension.host").ifPresent(builder::host);
+        context.getConfigurationParameter("dev.resteasy.junit.extension.port", Integer::parseInt).ifPresent(builder::port);
+        context.getConfigurationParameter("dev.resteasy.junit.extension.root-path").ifPresent(builder::rootPath);
+        return builder.build();
     }
 }

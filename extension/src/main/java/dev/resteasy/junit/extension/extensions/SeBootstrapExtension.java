@@ -21,7 +21,7 @@ public class SeBootstrapExtension implements BeforeAllCallback {
     public void beforeAll(final ExtensionContext context) throws Exception {
         lock.lock();
         try {
-            InstanceManager.getOrCreateInstance(context).startInstance();
+            InstanceManager.getOrCreateInstance(context).startInstance(context);
         } finally {
             lock.unlock();
         }

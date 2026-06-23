@@ -7,6 +7,8 @@ package dev.resteasy.junit.extension.extension;
 
 import jakarta.ws.rs.SeBootstrap;
 
+import org.junit.jupiter.api.extension.ExtensionContext;
+
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 
 /**
@@ -16,7 +18,7 @@ import dev.resteasy.junit.extension.api.ConfigurationProvider;
  */
 public class SecondInstanceConfigurationProvider implements ConfigurationProvider {
     @Override
-    public SeBootstrap.Configuration getConfiguration() {
+    public SeBootstrap.Configuration getConfiguration(final ExtensionContext context) {
         return SeBootstrap.Configuration.builder().port(9081).build();
     }
 }

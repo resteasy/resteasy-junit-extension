@@ -26,7 +26,7 @@ class Extensions {
                             .in(factoryType)
                             .unreflectSpecial(method, factoryType)
                             .bindTo(proxy)
-                            .invokeWithArguments());
+                            .invokeWithArguments(args));
         } else {
             try {
                 final Constructor<? extends T> constructor = factoryType.getConstructor();

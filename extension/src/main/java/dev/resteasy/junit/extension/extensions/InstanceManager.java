@@ -87,7 +87,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         }
     }
 
-    void startInstance() throws ExecutionException, InterruptedException {
+    void startInstance(final ExtensionContext context) throws ExecutionException, InterruptedException {
         lock.readLock().lock();
         try {
             if (holder != null) {
@@ -106,7 +106,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
             holder.bootstrap = bootstrap.get();
             final Class<? extends ConfigurationProvider> factoryType = holder.bootstrap.configFactory();
             final ConfigurationProvider factory = Extensions.createProvider(factoryType);
-            holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration())
+            holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration(context))
                     .toCompletableFuture()
                     .get(holder.bootstrap.timeout(), holder.bootstrap.timoutUnit());
         } catch (TimeoutException e) {

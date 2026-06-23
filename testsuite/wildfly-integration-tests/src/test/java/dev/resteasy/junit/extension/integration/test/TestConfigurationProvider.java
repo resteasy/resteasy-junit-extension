@@ -7,6 +7,7 @@ package dev.resteasy.junit.extension.integration.test;
 
 import jakarta.ws.rs.SeBootstrap;
 
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
@@ -19,7 +20,7 @@ public class TestConfigurationProvider implements ConfigurationProvider {
     public static final int PORT = 8085;
 
     @Override
-    public SeBootstrap.Configuration getConfiguration() {
+    public SeBootstrap.Configuration getConfiguration(final ExtensionContext context) {
         return SeBootstrap.Configuration.builder().port(PORT).build();
     }
 }

@@ -16,6 +16,7 @@ import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import dev.resteasy.junit.extension.annotations.RequestPath;
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
@@ -30,7 +31,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 public class SeBootstrapTest {
     public static class PortChangeConfigurationFactory implements ConfigurationProvider {
         @Override
-        public SeBootstrap.Configuration getConfiguration() {
+        public SeBootstrap.Configuration getConfiguration(final ExtensionContext context) {
             return SeBootstrap.Configuration.builder().port(8095).rootPath("/test").build();
         }
     }
