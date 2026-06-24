@@ -75,7 +75,6 @@
         <version.org.jboss.logging>3.6.3.Final</version.org.jboss.logging>
         <version.org.jboss.resteasy>6.2.16.Final</version.org.jboss.resteasy>
         <version.org.junit>5.14.4</version.org.junit>
-        <version.org.kohsuke.metainf-services>1.11</version.org.kohsuke.metainf-services>
 
         <!-- Plugin versions -->
         <version.formatter.maven.plugin>2.29.0</version.formatter.maven.plugin>
@@ -129,13 +128,6 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.kohsuke.metainf-services</groupId>
-                <artifactId>metainf-services</artifactId>
-                <version>${version.org.kohsuke.metainf-services}</version>
-                <scope>provided</scope>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
                 <version>${version.org.jboss.logging}</version>
@@ -143,30 +135,8 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <!-- Test to generate META-INF/services and should not be leaked outside of this project -->
-        <dependency>
-            <groupId>org.kohsuke.metainf-services</groupId>
-            <artifactId>metainf-services</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.kohsuke.metainf-services</groupId>
-                            <artifactId>metainf-services</artifactId>
-                            <version>${version.org.kohsuke.metainf-services}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>

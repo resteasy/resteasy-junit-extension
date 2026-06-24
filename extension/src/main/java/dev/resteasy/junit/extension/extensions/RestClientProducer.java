@@ -11,7 +11,6 @@ import jakarta.ws.rs.client.Client;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
 import dev.resteasy.junit.extension.api.RestResourceProducer;
@@ -19,7 +18,6 @@ import dev.resteasy.junit.extension.api.RestResourceProducer;
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@MetaInfServices
 public class RestClientProducer implements RestResourceProducer {
     @Override
     public boolean canInject(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {

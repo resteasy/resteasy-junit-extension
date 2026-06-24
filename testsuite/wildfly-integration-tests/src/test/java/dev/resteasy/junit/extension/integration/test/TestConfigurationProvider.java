@@ -8,14 +8,12 @@ package dev.resteasy.junit.extension.integration.test;
 import jakarta.ws.rs.SeBootstrap;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@MetaInfServices
 public class TestConfigurationProvider implements ConfigurationProvider {
     public static final int PORT = 8085;
 

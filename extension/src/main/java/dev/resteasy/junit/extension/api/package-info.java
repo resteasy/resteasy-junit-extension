@@ -29,7 +29,6 @@
  * <h2>Example: Custom Configuration Provider</h2>
  *
  * <pre>
- * &#64;MetaInfServices
  * public class CustomPortProvider implements ConfigurationProvider {
  *     &#64;Override
  *     public SeBootstrap.Configuration getConfiguration() {
@@ -48,7 +47,6 @@
  * <h2>Example: Custom Injection Producer</h2>
  *
  * <pre>
- * &#64;MetaInfServices
  * public class DatabaseProducer implements RestResourceProducer {
  *     &#64;Override
  *     public boolean canInject(ExtensionContext context, Class&lt;?&gt; clazz, Annotation... qualifiers) {

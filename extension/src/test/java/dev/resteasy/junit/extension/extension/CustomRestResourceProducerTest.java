@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.testkit.engine.EngineTestKit;
-import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestResource;
@@ -38,7 +37,6 @@ public class CustomRestResourceProducerTest {
      * {@code META-INF/services/dev.resteasy.junit.extension.api.RestResourceProducer} like:
      * </p>
      */
-    @MetaInfServices
     public static class CustomStringProducer implements RestResourceProducer {
 
         @Override

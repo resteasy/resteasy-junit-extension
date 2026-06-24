@@ -1,0 +1,7 @@
+#
+# Copyright The RESTEasy Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Test-only custom producer for testing the SPI mechanism
+dev.resteasy.junit.extension.extension.CustomRestResourceProducerTest$CustomStringProducer

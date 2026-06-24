@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.kohsuke.MetaInfServices;
 
 import dev.resteasy.junit.extension.annotations.RequestPath;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
@@ -24,7 +23,6 @@ import dev.resteasy.junit.extension.api.RestResourceProducer;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@MetaInfServices
 public class WebTargetProducer implements RestResourceProducer {
 
     @Override

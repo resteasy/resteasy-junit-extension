@@ -1,0 +1,7 @@
+#
+# Copyright The RESTEasy Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Test configuration provider for WildFly integration tests
+dev.resteasy.junit.extension.integration.test.TestConfigurationProvider
