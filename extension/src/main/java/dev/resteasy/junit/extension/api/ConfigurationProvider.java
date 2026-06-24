@@ -56,7 +56,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <h2>Requirements</h2>
  * <ul>
  * <li>Must have a public no-argument constructor</li>
- * <li>The {@link #getConfiguration()} method must return a non-null Configuration</li>
+ * <li>The {@link #getConfiguration(ExtensionContext)} method must return a non-null Configuration</li>
  * <li>Can be registered globally via ServiceLoader or specified per-test via {@code @RestBootstrap(configFactory = ...)}</li>
  * </ul>
  *
@@ -64,6 +64,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * @see dev.resteasy.junit.extension.annotations.RestBootstrap#configFactory()
  * @since 1.0.0
  */
+@FunctionalInterface
 public interface ConfigurationProvider {
 
     /**
@@ -83,16 +84,5 @@ public interface ConfigurationProvider {
      *
      * @return the configuration to use for starting the SeBootstrap instance, must not be {@code null}
      */
-    default Configuration getConfiguration(final ExtensionContext context) {
-        final ServiceLoader<ConfigurationProvider> loader = ServiceLoader.load(ConfigurationProvider.class);
-        if (loader.iterator().hasNext()) {
-            return loader.iterator().next().getConfiguration(context);
-        }
-        final Configuration.Builder builder = Configuration.builder();
-        context.getConfigurationParameter("dev.resteasy.junit.extension.protocol").ifPresent(builder::protocol);
-        context.getConfigurationParameter("dev.resteasy.junit.extension.host").ifPresent(builder::host);
-        context.getConfigurationParameter("dev.resteasy.junit.extension.port", Integer::parseInt).ifPresent(builder::port);
-        context.getConfigurationParameter("dev.resteasy.junit.extension.root-path").ifPresent(builder::rootPath);
-        return builder.build();
-    }
+    Configuration getConfiguration(ExtensionContext context);
 }

@@ -24,6 +24,7 @@ import org.junit.platform.commons.support.AnnotationSupport;
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
+import dev.resteasy.junit.extension.api.RestClientBuilderProvider;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -105,7 +106,8 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
             holder = new BootstrapHolder();
             holder.bootstrap = bootstrap.get();
             final Class<? extends ConfigurationProvider> factoryType = holder.bootstrap.configFactory();
-            final ConfigurationProvider factory = Extensions.createProvider(factoryType);
+            final ConfigurationProvider factory = Extensions.createProvider(factoryType, ConfigurationProvider.class,
+                    DefaultConfigurationProvider::new);
             holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration(context))
                     .toCompletableFuture()
                     .get(holder.bootstrap.timeout(), holder.bootstrap.timoutUnit());
@@ -176,7 +178,8 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
             return ClientBuilder.newClient();
         }
         final var factoryType = restClientConfig.value();
-        final var factory = Extensions.createProvider(factoryType);
+        final var factory = Extensions.createProvider(factoryType, RestClientBuilderProvider.class,
+                () -> ClientBuilder::newBuilder);
         final var builder = factory.getClientBuilder();
         return builder.build();
     }

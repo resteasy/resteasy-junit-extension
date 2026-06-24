@@ -10,6 +10,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
+import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -17,7 +19,16 @@ import java.lang.reflect.Proxy;
 class Extensions {
 
     @SuppressWarnings("unchecked")
-    static <T> T createProvider(final Class<? extends T> factoryType) {
+    static <T> T createProvider(final Class<? extends T> factoryType, final Class<T> interfaceType,
+            final Supplier<T> defaultProvider) {
+        if (factoryType == interfaceType) {
+            final ServiceLoader<T> loader = ServiceLoader.load(interfaceType);
+            if (loader.iterator().hasNext()) {
+                return loader.iterator().next();
+            }
+            return defaultProvider.get();
+        }
+
         if (factoryType.isInterface()) {
             final Class<?>[] interfaces = { factoryType };
             return (T) Proxy.newProxyInstance(factoryType.getClassLoader(), interfaces,

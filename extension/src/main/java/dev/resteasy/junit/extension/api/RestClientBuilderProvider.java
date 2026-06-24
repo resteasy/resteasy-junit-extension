@@ -66,6 +66,7 @@ import jakarta.ws.rs.client.ClientBuilder;
  * @see dev.resteasy.junit.extension.annotations.RestClientConfig
  * @since 1.0.0
  */
+@FunctionalInterface
 public interface RestClientBuilderProvider {
 
     /**
@@ -82,11 +83,5 @@ public interface RestClientBuilderProvider {
      *
      * @return the {@link ClientBuilder} to use for creating REST client instances, must not be {@code null}
      */
-    default ClientBuilder getClientBuilder() {
-        final ServiceLoader<RestClientBuilderProvider> loader = ServiceLoader.load(RestClientBuilderProvider.class);
-        if (loader.iterator().hasNext()) {
-            return loader.iterator().next().getClientBuilder();
-        }
-        return ClientBuilder.newBuilder();
-    }
+    ClientBuilder getClientBuilder();
 }
