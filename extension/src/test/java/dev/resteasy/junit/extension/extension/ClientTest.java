@@ -5,7 +5,6 @@
 
 package dev.resteasy.junit.extension.extension;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
 /**
@@ -24,29 +24,29 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 @RestBootstrap(TestApplication.class)
 public class ClientTest {
 
-    @Inject
+    @RestResource
     private static SeBootstrap.Configuration CONFIGURATION;
 
-    @Inject
+    @RestResource
     private static Client STATIC_CLIENT;
 
-    @Inject
+    @RestResource
     private Client instanceClient;
 
     private final Client constructorClient;
 
-    public ClientTest(final Client constructorClient) {
+    public ClientTest(@RestResource final Client constructorClient) {
         this.constructorClient = constructorClient;
     }
 
     @BeforeAll
-    public static void checkBeforeAll(final Client client) {
+    public static void checkBeforeAll(@RestResource final Client client) {
         // The client should be available and ready to use
         assertClientAvailable(client);
     }
 
     @AfterAll
-    public static void checkAfterAll(final Client client) {
+    public static void checkAfterAll(@RestResource final Client client) {
         // The client should be available and ready to use
         assertClientAvailable(client);
     }
@@ -57,7 +57,7 @@ public class ClientTest {
     }
 
     @Test
-    public void checkParameter(final Client client) {
+    public void checkParameter(@RestResource final Client client) {
         assertClientAvailable(client);
     }
 

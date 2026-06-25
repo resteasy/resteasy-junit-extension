@@ -24,9 +24,10 @@
 
     <url>https://resteasy.dev</url>
     <inceptionYear>2024</inceptionYear>
+
     <organization>
-        <name>Red Hat, Inc.</name>
-        <url>https://redhat.com</url>
+        <name>RESTEasy Community</name>
+        <url>https://resteasy.dev</url>
     </organization>
 
     <licenses>
@@ -50,6 +51,7 @@
     <modules>
         <module>extension</module>
         <module>testsuite</module>
+        <module>docs</module>
     </modules>
 
     <scm>
@@ -65,15 +67,14 @@
     </issueManagement>
 
     <properties>
-        <!-- Compile to Java SE 17 -->
+        <!-- Compile to Java SE 11 -->
         <maven.compiler.release>11</maven.compiler.release>
 
         <!-- Dependency Versions, keep in alphabetical order -->
         <version.jakarta.ee>10.0.0</version.jakarta.ee>
-        <version.org.jboss.logging>3.6.0.Final</version.org.jboss.logging>
+        <version.org.jboss.logging>3.6.3.Final</version.org.jboss.logging>
         <version.org.jboss.resteasy>6.2.16.Final</version.org.jboss.resteasy>
         <version.org.junit>5.14.4</version.org.junit>
-        <version.org.kohsuke.metainf-services>1.11</version.org.kohsuke.metainf-services>
 
         <!-- Plugin versions -->
         <version.formatter.maven.plugin>2.29.0</version.formatter.maven.plugin>
@@ -127,37 +128,19 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.kohsuke.metainf-services</groupId>
-                <artifactId>metainf-services</artifactId>
-                <version>${version.org.kohsuke.metainf-services}</version>
-                <scope>provided</scope>
-                <optional>true</optional>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${version.org.jboss.logging}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <!-- Test to generate META-INF/services and should not be leaked outside of this project -->
-        <dependency>
-            <groupId>org.kohsuke.metainf-services</groupId>
-            <artifactId>metainf-services</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.kohsuke.metainf-services</groupId>
-                            <artifactId>metainf-services</artifactId>
-                            <version>${version.org.kohsuke.metainf-services}</version>
-                        </path>
-                    </annotationProcessorPaths>
+                    <excludePackageNames>dev.resteasy.junit.extension.extensions</excludePackageNames>
                 </configuration>
             </plugin>
             <plugin>

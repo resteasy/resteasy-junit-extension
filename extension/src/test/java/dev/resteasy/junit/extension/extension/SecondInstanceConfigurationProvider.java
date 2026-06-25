@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package dev.resteasy.junit.extension.integration.test;
+package dev.resteasy.junit.extension.extension;
 
 import jakarta.ws.rs.SeBootstrap;
 
@@ -12,13 +12,13 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 
 /**
- * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ * Configuration provider for port 9081 (used by nested test classes).
+ *
+ * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-public class TestConfigurationProvider implements ConfigurationProvider {
-    public static final int PORT = 8085;
-
+public class SecondInstanceConfigurationProvider implements ConfigurationProvider {
     @Override
     public SeBootstrap.Configuration getConfiguration(final ExtensionContext context) {
-        return SeBootstrap.Configuration.builder().port(PORT).build();
+        return SeBootstrap.Configuration.builder().port(9081).build();
     }
 }

@@ -1,0 +1,10 @@
+#
+# Copyright The RESTEasy Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Built-in RestResourceProducer implementations
+dev.resteasy.junit.extension.extensions.ConfigurationProducer
+dev.resteasy.junit.extension.extensions.RestClientProducer
+dev.resteasy.junit.extension.extensions.UriProducer
+dev.resteasy.junit.extension.extensions.WebTargetProducer

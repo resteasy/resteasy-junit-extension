@@ -1,8 +1,14 @@
-= Jakarta REST `SeBoostrap` JUnit Integration
+= Jakarta REST `SeBootstrap` JUnit Integration
 :toc:
 
 This is a simple project which allows a unit testing for Jakarta REST endpoints using the `SeBootstrap` from
 https://jakarta.ee/specifications/restful-ws/3.1/apidocs/jakarta.ws.rs/jakarta/ws/rs/sebootstrap[Jakarta REST 3.1].
+
+== Documentation
+
+For complete documentation including advanced features, extension points, and best practices, see the link:docs/src/main/asciidoc/index.adoc[full documentation].
+
+The documentation is also published to GitHub Pages with each release: https://resteasy.dev/resteasy-junit-extension/
 
 == Usage
 
@@ -80,7 +86,7 @@ any Jakarta REST 3.1+ implementation.
 @RestBootstrap(value = SimpleTest.TestApplication.class)
 public class SimpleTest {
 
-    @Inject
+    @RestResource
     @RequestPath("/test/echo")
     private WebTarget webTarget;
 
@@ -120,8 +126,8 @@ public class SimpleTest {
 
 === Injection
 
-You can inject some types into your tests. For fields you use the `@jakarta.inject.Inject` annotation. Constructor and
-method parameters do not require the `@Inject` annotation. The following types can be injected.
+You can inject some types into your tests. For fields you use the `@RestResource` annotation. Constructor and
+method parameters do not require the `@RestResource` annotation. The following types can be injected.
 
 * `jakarta.ws.rs.SeBootstrap.Configuration`
 +
