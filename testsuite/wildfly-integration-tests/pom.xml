@@ -4,14 +4,12 @@
   ~ SPDX-License-Identifier: Apache-2.0
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>dev.resteasy.junit.extension</groupId>
         <artifactId>testsuite</artifactId>
-        <version>1.0.0.Final-SNAPSHOT</version>
+        <version>1.0.0.Beta2</version>
     </parent>
 
     <artifactId>wildfly-integration-tests</artifactId>
@@ -33,7 +31,7 @@
 
         <server.test.feature.pack.groupId>org.wildfly</server.test.feature.pack.groupId>
         <server.test.feature.pack.artifactId>wildfly-ee-galleon-pack</server.test.feature.pack.artifactId>
-        <version.org.wildfly/>
+        <version.org.wildfly />
 
         <wildfly.channel.manifest.groupId>org.wildfly.channels</wildfly.channel.manifest.groupId>
         <wildfly.channel.manifest.artifactId>wildfly-ee</wildfly.channel.manifest.artifactId>
@@ -169,6 +167,6 @@
         </plugins>
     </build>
 
-    <profiles/>
+    <profiles />
 
 </project>
