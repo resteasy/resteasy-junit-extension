@@ -87,6 +87,57 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public interface RestResourceProducer {
 
     /**
+     * Defines the lifecycle scope for resources produced by a {@link RestResourceProducer}.
+     * <p>
+     * The scope determines when {@link AutoCloseable} resources are automatically closed after injection.
+     * This allows producers to balance performance (class-scoped reuse) with isolation (method-scoped cleanup).
+     * </p>
+     *
+     * @since 1.0.0
+     */
+    enum Scope {
+        /**
+         * Use the natural scope of the injection point.
+         * <ul>
+         * <li><b>Static fields:</b> Cleaned up when the test class completes</li>
+         * <li><b>Instance fields:</b> Cleaned up when the test class completes</li>
+         * <li><b>Method parameters:</b> Cleaned up when the test method completes</li>
+         * </ul>
+         * <p>
+         * This is the default scope and is appropriate for most custom producers where method-level isolation
+         * is desired for parameters (e.g., temporary files, test-specific resources).
+         * </p>
+         *
+         * @see #CLASS
+         */
+        DEFAULT,
+
+        /**
+         * Always use class scope for all injection points.
+         * <p>
+         * Resources are cleaned up when the test class completes, regardless of whether injected into a field
+         * or method parameter. This scope is appropriate for expensive-to-create resources that are safe to
+         * share across test methods.
+         * </p>
+         * <p>
+         * <b>Example use cases:</b>
+         * </p>
+         * <ul>
+         * <li>REST clients (thread-safe, expensive to create)</li>
+         * <li>Database connection pools (designed for reuse)</li>
+         * <li>Immutable configuration objects</li>
+         * </ul>
+         * <p>
+         * Built-in producers ({@code Client}, {@code WebTarget}, {@code URI}, {@code Configuration}) use
+         * {@code CLASS} scope for performance.
+         * </p>
+         *
+         * @see #DEFAULT
+         */
+        CLASS
+    }
+
+    /**
      * Determines whether this producer can inject the specified type.
      * <p>
      * This method is called by the extension to find the appropriate producer for each injection point. It should
@@ -126,4 +177,21 @@ public interface RestResourceProducer {
      *                                  via {@link #canInject} first)
      */
     Object produce(ExtensionContext context, Class<?> clazz, Annotation... qualifiers) throws IllegalArgumentException;
+
+    /**
+     * Returns the lifecycle scope for resources produced by this producer.
+     * <p>
+     * The default implementation returns {@link Scope#DEFAULT}, which uses the natural scope of the injection point:
+     * method parameters are cleaned up after each test method, while fields are cleaned up when the test class completes.
+     * </p>
+     * <p>
+     * Producers can override this method to return {@link Scope#CLASS} for expensive-to-create resources that should
+     * be shared across all test methods in a class.
+     * </p>
+     *
+     * @return the scope for resources produced by this producer
+     */
+    default Scope scope() {
+        return Scope.DEFAULT;
+    }
 }

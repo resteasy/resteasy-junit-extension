@@ -34,4 +34,9 @@ public class ConfigurationProducer implements RestResourceProducer {
         throw new IllegalArgumentException(
                 String.format("Type %s is not assignable to %s", clazz.getName(), SeBootstrap.Configuration.class));
     }
+
+    @Override
+    public Scope scope() {
+        return Scope.CLASS;
+    }
 }

@@ -5,11 +5,12 @@
 
 package dev.resteasy.junit.extension.extensions;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.ServiceLoader;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -88,11 +89,8 @@ public class RestResourceProducerExtension
 
         try {
             // Pass the lexical context to the producer!
-            final Object value = producer.produce(lexicalContext, parameterContext.getParameter().getType(),
-                    parameterContext.getParameter().getAnnotations());
-
-            trackResource(lexicalContext, value);
-            return value;
+            return resolveValue(lexicalContext, producer, parameterContext.getParameter()
+                    .getType(), parameterContext.getParameter().getAnnotations(), true);
         } catch (Throwable e) {
             throw new ParameterResolutionException(
                     String.format("Failed to resolve parameter '%s'.", parameterContext.getParameter()), e);
@@ -129,8 +127,7 @@ public class RestResourceProducerExtension
                                 .getName()));
             }
             try {
-                final Object value = resourceProducer.produce(context, field.getType(), field.getAnnotations());
-                trackResource(context, value);
+                final Object value = resolveValue(context, resourceProducer, field.getType(), field.getAnnotations(), false);
                 if (field.trySetAccessible()) {
                     field.set(testInstance, value);
                 } else {
@@ -148,7 +145,7 @@ public class RestResourceProducerExtension
     }
 
     private RestResourceProducer getProducer(ExtensionContext context, Class<?> type,
-            java.lang.annotation.Annotation[] annotations) {
+            Annotation[] annotations) {
         for (RestResourceProducer producer : producers) {
             if (producer.canInject(context, type, annotations)) {
                 return producer;
@@ -173,31 +170,57 @@ public class RestResourceProducerExtension
         return runtimeContext;
     }
 
-    /**
-     * Tracks resources in the specific context's Store so they are closed exactly when THAT context ends.
-     */
-    private void trackResource(final ExtensionContext context, final Object value) {
-        if (value instanceof AutoCloseable) {
-            ResourceTracker tracker = ClassContext.getStore(context).getOrComputeIfAbsent(ResourceTracker.class,
-                    k -> new ResourceTracker(), ResourceTracker.class);
-            tracker.resources.add((AutoCloseable) value);
+    private Object resolveValue(final ExtensionContext context, final RestResourceProducer producer, final Class<?> clazz,
+            final Annotation[] annotations, final boolean isParameter) {
+        final RestResourceProducer.Scope scope = producer.scope();
+        final ExtensionContext.Store store;
+        if (scope == RestResourceProducer.Scope.DEFAULT && isParameter) {
+            store = context
+                    .getStore(ExtensionContext.Namespace.create(RestResourceProducerExtension.class));
+        } else {
+            store = ClassContext.getStore(context);
         }
+        return store.getOrComputeIfAbsent(CacheKey.of(producer.getClass(), scope, annotations),
+                (key) -> producer.produce(context, clazz, annotations));
     }
 
-    // Completely replaces the AfterAllCallback, guaranteeing thread-safe, context-isolated teardowns
-    private static class ResourceTracker implements ExtensionContext.Store.CloseableResource, AutoCloseable {
-        private final BlockingDeque<AutoCloseable> resources = new LinkedBlockingDeque<>();
+    private static class CacheKey {
+        private final Class<?> type;
+        private final RestResourceProducer.Scope scope;
+        private final Annotation[] annotations;
+
+        private CacheKey(final Class<?> type, final RestResourceProducer.Scope scope, final Annotation[] annotations) {
+            this.type = type;
+            this.scope = scope;
+            this.annotations = annotations;
+        }
+
+        static CacheKey of(final Class<?> type, final RestResourceProducer.Scope scope, final Annotation[] annotations) {
+            return new CacheKey(type, scope, annotations);
+        }
 
         @Override
-        public void close() {
-            AutoCloseable closeable;
-            while ((closeable = resources.pollFirst()) != null) {
-                try {
-                    closeable.close();
-                } catch (Throwable t) {
-                    // Ignored during teardown
-                }
+        public int hashCode() {
+            return Objects.hash(type, scope, Arrays.hashCode(annotations));
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
             }
+            if (!(obj instanceof CacheKey)) {
+                return false;
+            }
+            final CacheKey other = (CacheKey) obj;
+            return Objects.equals(type, other.type)
+                    && Objects.equals(scope, other.scope)
+                    && Arrays.equals(annotations, other.annotations);
+        }
+
+        @Override
+        public String toString() {
+            return "CacheKey[type=" + type + ", scope=" + scope + ", annotations=" + Arrays.toString(annotations) + "]";
         }
     }
 }

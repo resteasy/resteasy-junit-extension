@@ -374,6 +374,80 @@ public class DatabaseTest {
 }
 ----
 
+=== Resource Scoping
+
+Custom `RestResourceProducer` implementations can control the lifecycle scope of injected resources by overriding the
+`scope()` method. This determines when `AutoCloseable` resources are automatically closed.
+
+**Available Scopes:**
+
+* **`Scope.DEFAULT`** (default) - Uses the natural scope of the injection point:
+    ** Fields (static and instance): Cleaned up when the test class completes
+    ** Method parameters: Cleaned up when the test method completes
+* **`Scope.CLASS`** - Always use class scope:
+    ** All injections (fields and parameters): Cleaned up when the test class completes
+
+**When to use each scope:**
+
+Use `Scope.CLASS` for:
+
+* Expensive-to-create resources (REST clients, database connection pools)
+* Thread-safe, immutable, or stateless resources
+* Resources designed for reuse across multiple test methods
+
+Use `Scope.DEFAULT` for:
+
+* Resources that need isolation between test methods (temporary files, test-specific data)
+* Resources that accumulate state or side effects
+* Lightweight resources where recreation cost is negligible
+
+**Example: Temporary File Producer with Method-Scoped Cleanup**
+
+[source,java]
+----
+public class TempFileProducer implements RestResourceProducer {
+
+    @Override
+    public boolean canInject(ExtensionContext context, Class<?> clazz,
+                             Annotation... qualifiers) {
+        return TempFile.class.isAssignableFrom(clazz);
+    }
+
+    @Override
+    public Object produce(ExtensionContext context, Class<?> clazz,
+                          Annotation... qualifiers) {
+        return new TempFile(); // AutoCloseable - deletes file on close
+    }
+
+    @Override
+    public Scope scope() {
+        return Scope.DEFAULT; // Method parameters auto-cleanup per method
+    }
+}
+
+@RestBootstrap(MyApp.class)
+public class FileProcessingTest {
+
+    @Test
+    public void testMethod1(@RestResource TempFile tempFile) {
+        // Fresh temp file created for this method
+        tempFile.write("test data");
+        // Automatically deleted after this method completes
+    }
+
+    @Test
+    public void testMethod2(@RestResource TempFile tempFile) {
+        // Different temp file from testMethod1
+        // Also deleted after this method completes
+    }
+}
+----
+
+**Built-in Producer Scopes:**
+
+Built-in producers for the `Client` and `Configuration` use a `Scope.CLASS`. The client is shared for performance
+reasons and the configuration is scoped to the `SeBootstrap.Instance`.
+
 === Global Configuration Providers
 
 Register a global `ConfigurationProvider` or `RestClientBuilderProvider` via ServiceLoader to apply configuration to all
@@ -406,7 +480,9 @@ Complete working examples can be found in the link:https://github.com/resteasy/r
 * **`UriInjectionTest`** - URI injection with and without `@RequestPath`
 * **`UriBuilderTest`** - UriBuilder injection and mutability
 * **`SharedConfigInstanceTest`** - Configuration injection and nested test behavior
-* **`CustomInjectionProducerTest`** - Custom `RestResourceProducer` implementation
+* **`CustomRestResourceProducerTest`** - Custom `RestResourceProducer` implementation
+* **`ResourceScopeTest`** - Resource lifecycle scoping (CLASS vs DEFAULT)
+* **`MethodScopedResourceTest`** - Practical example of method-scoped temporary files
 
 == Configuration Reference
 
@@ -486,6 +562,16 @@ A: Ensure your test class is annotated with `@RestBootstrap` and that you have a
 **Q: Can nested test classes have different configurations?**
 
 A: Yes! Add `@RestBootstrap` with a custom `configFactory` to the nested class. However, note that some Jakarta REST implementations (like RESTEasy with CDI) may not support running multiple `SeBootstrap` instances simultaneously due to singleton container limitations.
+
+**Q: When are injected resources cleaned up?**
+
+A: It depends on the producer's scope:
+
+* **Built-in resources** (`Client`, `Configuration`): Use `CLASS` scope - cleaned up when the test class completes, regardless of injection point.
+* **Custom producers with `DEFAULT` scope**: Fields are cleaned up when the test class completes. Method parameters are cleaned up when the test method completes.
+* **Custom producers with `CLASS` scope**: Always cleaned up when the test class completes.
+
+Override `scope()` in your custom `RestResourceProducer` to control this behavior.
 
 == Related Documentation
 
