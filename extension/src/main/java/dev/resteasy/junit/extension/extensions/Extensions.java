@@ -13,6 +13,8 @@ import java.lang.reflect.Proxy;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.extension.ExtensionContextException;
+
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
@@ -39,12 +41,13 @@ class Extensions {
                 final Constructor<? extends T> constructor = factoryType.getConstructor();
                 return constructor.newInstance();
             } catch (InvocationTargetException | InstantiationException e) {
-                throw new RuntimeException(String.format("Failed to create provider %s", factoryType.getName()), e);
+                throw new ExtensionContextException(String.format("Failed to create provider %s", factoryType.getName()), e);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
+                throw new ExtensionContextException(
                         String.format("Failed to find no-arg constructor for type %s", factoryType.getName()), e);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(String.format("Constructor for %s is not public.", factoryType.getName()), e);
+                throw new ExtensionContextException(String.format("Constructor for %s is not public.", factoryType.getName()),
+                        e);
             }
         }
     }

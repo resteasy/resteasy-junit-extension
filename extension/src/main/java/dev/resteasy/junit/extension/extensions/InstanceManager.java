@@ -22,6 +22,7 @@ import jakarta.ws.rs.core.Application;
 
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContextException;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
@@ -68,7 +69,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         lock.readLock().lock();
         try {
             if (holder == null) {
-                throw new IllegalStateException("The bootstrap instance has not been started");
+                throw new ExtensionContextException("The bootstrap instance has not been started");
             }
             return holder.instance;
         } finally {
@@ -107,7 +108,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
             holder.instance = stage.toCompletableFuture()
                     .get(bootstrap.timeout(), bootstrap.timeoutUnit());
         } catch (TimeoutException e) {
-            throw new AssertionError(String.format("Failed to start the SeBootstrap instance in %d %s",
+            throw new ExtensionContextException(String.format("Failed to start the SeBootstrap instance in %d %s",
                     bootstrap.timeout(), bootstrap.timeoutUnit()
                             .toChronoUnit()),
                     e);
@@ -127,14 +128,14 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                             .get(bootstrap.timeout(), bootstrap.timeoutUnit());
                 }
             } catch (TimeoutException e) {
-                throw new AssertionError(String.format("Failed to stop the SeBootstrap instance in %d %s",
+                throw new ExtensionContextException(String.format("Failed to stop the SeBootstrap instance in %d %s",
                         bootstrap.timeout(), bootstrap.timeoutUnit()
                                 .toChronoUnit()),
                         e);
             } catch (InterruptedException ignore) {
                 // Ignore the interrupted exception
             } catch (ExecutionException e) {
-                throw new AssertionError("Failed waiting for the server to stop", e);
+                throw new ExtensionContextException("Failed waiting for the server to stop", e);
             } finally {
                 lock.writeLock().unlock();
             }
@@ -152,7 +153,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         lock.readLock().lock();
         try {
             if (holder == null) {
-                throw new IllegalStateException("The bootstrap instance has not been started");
+                throw new ExtensionContextException("The bootstrap instance has not been started");
             }
             final String key = clientKey(restClientConfig);
             return holder.clients.computeIfAbsent(key, k -> createClient(restClientConfig));
