@@ -175,7 +175,8 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
 
     private Client createClient(final RestClientConfig restClientConfig) {
         if (restClientConfig == null) {
-            return ClientBuilder.newClient();
+            return Extensions.loadProvider(RestClientBuilderProvider.class, () -> ClientBuilder::newBuilder).getClientBuilder()
+                    .build();
         }
         final var factoryType = restClientConfig.value();
         final var factory = Extensions.createProvider(factoryType, RestClientBuilderProvider.class,

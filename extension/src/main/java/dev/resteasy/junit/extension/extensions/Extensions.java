@@ -22,11 +22,7 @@ class Extensions {
     static <T> T createProvider(final Class<? extends T> factoryType, final Class<T> interfaceType,
             final Supplier<T> defaultProvider) {
         if (factoryType == interfaceType) {
-            final ServiceLoader<T> loader = ServiceLoader.load(interfaceType);
-            if (loader.iterator().hasNext()) {
-                return loader.iterator().next();
-            }
-            return defaultProvider.get();
+            return loadProvider(interfaceType, defaultProvider);
         }
 
         if (factoryType.isInterface()) {
@@ -51,6 +47,14 @@ class Extensions {
                 throw new RuntimeException(String.format("Constructor for %s is not public.", factoryType.getName()), e);
             }
         }
+    }
+
+    static <T> T loadProvider(final Class<T> interfaceType, final Supplier<T> defaultProvider) {
+        final ServiceLoader<T> loader = ServiceLoader.load(interfaceType);
+        if (loader.iterator().hasNext()) {
+            return loader.iterator().next();
+        }
+        return defaultProvider.get();
     }
 
     static <T extends Annotation> T findQualifier(final Class<T> qualifier, final Annotation[] qualifiers) {
