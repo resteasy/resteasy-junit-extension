@@ -146,7 +146,6 @@ The base URI for `SeBootstrap.Instance` that was started.
 +
 This can be used with the `@RequestPath` qualifier. It creates a `WebTarget` from a configured client.
 
-
 [cols="3,^1,^1,^1,3a"]
 |===
 |Type |Field |Parameter |Constructor |Qualifiers
@@ -191,15 +190,17 @@ This can be used with the `@RequestPath` qualifier. It creates a `WebTarget` fro
 Releasing the project requires permission to deploy to Maven Central see https://central.sonatype.org/publish/requirements/[Maven Central Release Requirements].
 Once everything is setup, you simply need to run the `./release.sh` script. There are two required parameters:
 
-1. `-r` or `--release` which is the version you want to release
-2. `-d` or `--development` which is the next development version.
+. `-r` or `--release` which is the version you want to release
+. `-d` or `--development` which is the next development version.
 
 By default the release version cannot contain `SNAPSHOT` and the development version, must container `SNAPSHOT`.
 
 [source,bash]
+----
 .Example Command
 ----
 ./release -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
+----
 ----
 
 === Supported Arguments
@@ -245,6 +246,5 @@ Any next steps should you want to continue the release will need to be manual.
 | Prints verbose output.
 
 |===
-
 
 Any additional arguments are considered arguments for the Maven command.

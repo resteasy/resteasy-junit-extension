@@ -76,9 +76,7 @@
         <version.org.junit>5.14.4</version.org.junit>
 
         <!-- Plugin versions -->
-        <version.formatter.maven.plugin>2.29.0</version.formatter.maven.plugin>
-        <version.impsort.maven.plugin>1.13.0</version.impsort.maven.plugin>
-        <version.central.publishing.maven.plugin>0.10.0</version.central.publishing.maven.plugin>
+        <version.spotless-maven-plugin>3.8.0</version.spotless-maven-plugin>
 
         <!-- Configuration properties -->
         <skipFormatting>false</skipFormatting>
@@ -143,53 +141,83 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>${version.formatter.maven.plugin}</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${version.spotless-maven-plugin}</version>
                 <dependencies>
                     <dependency>
                         <groupId>dev.resteasy.tools</groupId>
                         <artifactId>ide-config</artifactId>
-                        <version>3</version>
+                        <version>4</version>
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <!-- store outside of target to speed up formatting when mvn clean is used -->
-                    <cachedir>.cache</cachedir>
-                    <configFile>eclipse-code-formatter.xml</configFile>
-                    <configXmlFile>resteasy-xml.properties</configXmlFile>
-                    <includeResources>true</includeResources>
-                    <lineEnding>LF</lineEnding>
-                    <removeTrailingWhitespace>true</removeTrailingWhitespace>
                     <skip>${skipFormatting}</skip>
+                    <upToDateChecking>
+                        <enabled>true</enabled>
+                        <indexFile>${project.basedir}/.cache/spotless-index-${version.spotless-maven-plugin}</indexFile>
+                    </upToDateChecking>
+                    <java>
+                        <eclipse>
+                            <file>eclipse-code-formatter.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <order>\#,java,javax,jakarta,org,io,dev,com,net</order>
+                        </importOrder>
+                        <removeUnusedImports>
+                            <!-- default one fails to process the classes -->
+                            <engine>cleanthat-javaparser-unnecessaryimport</engine>
+                        </removeUnusedImports>
+                        <forbidWildcardImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                        <licenseHeader>
+                            <file>license-java-asl-header</file>
+                            <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                            <delimiter>(\n)*^(\/\/tag.+|\/\/spotless.+|package .+;|module .+;|\/\/.+|\/\*\*.*)$</delimiter>
+                        </licenseHeader>
+                        <replaceRegex>
+                            <name>Remove wildcard imports</name>
+                            <searchRegex>^import\s+[^\*\s]+\*;$</searchRegex>
+                            <replacement>$1</replacement>
+                        </replaceRegex>
+                    </java>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>src/**/*.xml</include>
+                            </includes>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <licenseHeader>
+                                <file>license-xml-asl-header</file>
+                                <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                                <delimiter><![CDATA[(\n)*^(<[^!?]+|<!DOCTYPE.+)$]]></delimiter>
+                                <skipLinesMatching><![CDATA[<\?xml.+\?>]]></skipLinesMatching>
+                            </licenseHeader>
+                            <indent>
+                                <spaces>true</spaces>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <asciidoc>
+                        <includes>
+                            <include>**/*.adoc</include>
+                        </includes>
+
+                        <adocfmt>
+                            <normalizeListBullets>true</normalizeListBullets>
+                            <normalizeOrderedListMarkers>true</normalizeOrderedListMarkers>
+                            <ensureSourceDelimiters>true</ensureSourceDelimiters>
+                        </adocfmt>
+                    </asciidoc>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>format</id>
                         <goals>
-                            <goal>format</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code</groupId>
-                <artifactId>impsort-maven-plugin</artifactId>
-                <version>${version.impsort.maven.plugin}</version>
-                <configuration>
-                    <!-- store outside of target to speed up formatting when mvn clean is used -->
-                    <cachedir>.cache</cachedir>
-                    <groups>java.,javax.,jakarta.,org.,com.</groups>
-                    <staticGroups>*</staticGroups>
-                    <skip>${skipFormatting}</skip>
-                    <removeUnused>true</removeUnused>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>sort-imports</id>
-                        <goals>
-                            <goal>sort</goal>
+                            <goal>apply</goal>
                         </goals>
                         <phase>process-sources</phase>
                     </execution>
@@ -205,24 +233,11 @@
                 <plugins>
                     <!-- Validate formatting -->
                     <plugin>
-                        <groupId>net.revelc.code.formatter</groupId>
-                        <artifactId>formatter-maven-plugin</artifactId>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>validate-format</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>validate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>net.revelc.code</groupId>
-                        <artifactId>impsort-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>check-import-sort</id>
                                 <phase>validate</phase>
                                 <goals>
                                     <goal>check</goal>
