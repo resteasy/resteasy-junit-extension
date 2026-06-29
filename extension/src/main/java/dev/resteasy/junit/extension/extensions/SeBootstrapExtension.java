@@ -5,25 +5,38 @@
 
 package dev.resteasy.junit.extension.extensions;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Optional;
+
+import jakarta.ws.rs.core.Application;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.support.AnnotationSupport;
+
+import dev.resteasy.junit.extension.annotations.RestBootstrap;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public class SeBootstrapExtension implements BeforeAllCallback {
-    private final Lock lock = new ReentrantLock();
 
     @Override
     public void beforeAll(final ExtensionContext context) throws Exception {
-        lock.lock();
-        try {
-            InstanceManager.getOrCreateInstance(context).startInstance(context);
-        } finally {
-            lock.unlock();
+        final Class<?> testClass = context.getRequiredTestClass();
+        final Optional<RestBootstrap> bootstrap = AnnotationSupport.findAnnotation(testClass, RestBootstrap.class);
+        if (bootstrap.isEmpty()) {
+            return;
         }
+        final RestBootstrap restBootstrap = bootstrap.get();
+        // Validate the RestBootstrap annotation. Only the value() or the resources() can be defined, but not both
+        if (restBootstrap.value() == Application.class && restBootstrap.resources().length == 0) {
+            throw new ExtensionConfigurationException(
+                    "Must define either a Jakarta REST Application in the value or Jakarta REST resources in the resources.");
+        }
+        if (restBootstrap.value() != Application.class && restBootstrap.resources().length > 0) {
+            throw new ExtensionConfigurationException("Only the value() or resources() is allowed to be defined.");
+        }
+        InstanceManager.getOrCreateInstance(context, testClass, restBootstrap).startInstance(context);
     }
 }

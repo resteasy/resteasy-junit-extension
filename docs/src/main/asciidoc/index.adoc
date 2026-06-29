@@ -47,6 +47,38 @@ Add the extension to your test dependencies:
 
 === Basic Example
 
+==== Simple Resource-Based Test
+
+For simple tests, you can specify resource classes directly:
+
+[source,java]
+----
+@RestBootstrap(resources = HelloResource.class)
+public class HelloResourceTest {
+
+    @RestResource
+    private Client client;
+
+    @RestResource
+    private URI baseUri;
+
+    @Test
+    public void testHello() {
+        Response response = client.target(baseUri)
+            .path("/hello")
+            .request()
+            .get();
+
+        assertEquals(200, response.getStatus());
+        assertEquals("Hello, World!", response.readEntity(String.class));
+    }
+}
+----
+
+==== Application-Based Test
+
+For more complex scenarios, use a custom `Application` class:
+
 [source,java]
 ----
 @RestBootstrap(MyApplication.class)
@@ -73,7 +105,7 @@ public class HelloResourceTest {
 
 That's it! The extension automatically:
 
-* Starts a `SeBootstrap` instance with your Application
+* Starts a `SeBootstrap` instance with your resources or Application
 * Injects a configured REST client
 * Provides the server's base URI
 * Shuts everything down after tests complete
@@ -82,21 +114,53 @@ That's it! The extension automatically:
 
 === `@RestBootstrap` Annotation
 
-The `@RestBootstrap` annotation marks a test class to start a Jakarta REST `SeBootstrap` instance:
+The `@RestBootstrap` annotation marks a test class to start a Jakarta REST `SeBootstrap` instance.
+
+There are two ways to specify what to bootstrap:
+
+==== Option 1: Resource Classes (Simple Cases)
+
+For simple tests, specify Jakarta REST resource classes directly:
+
+[source,java]
+----
+@RestBootstrap(resources = {UserResource.class, OrderResource.class})
+public class MyTest {
+    // Tests run with a synthetic Application containing these resources
+}
+----
+
+This is ideal when you only need to test specific resources without custom Application configuration.
+
+==== Option 2: Application Class (Advanced Cases)
+
+For more control, specify a custom `Application` class:
 
 [source,java]
 ----
 @RestBootstrap(MyApplication.class)
 public class MyTest {
-    // Tests run with SeBootstrap instance
+    // Tests run with MyApplication
 }
 ----
 
+Use this when you need:
+
+* Custom `@ApplicationPath` configuration
+* Provider registration (filters, interceptors, exception mappers)
+* Custom application properties
+* Programmatic configuration in the Application class
+
+==== Mutual Exclusivity
+
+**Important:** Exactly one of `value()` or `resources()` must be specified. Specifying both or neither will result in an error.
+
 **Attributes:**
 
-* `value` - The Jakarta REST `Application` class to bootstrap (required)
+* `value` - The Jakarta REST `Application` class to bootstrap (mutually exclusive with `resources`)
+* `resources` - Jakarta REST resource classes to bootstrap (mutually exclusive with `value`)
 * `configFactory` - Optional `ConfigurationProvider` for custom server configuration
-* `timeout` - Startup/shutdown timeout (default: 10 seconds)
+* `timeout` - Startup/shutdown timeout (default: 60 seconds)
 * `timeoutUnit` - Timeout time unit (default: `SECONDS`)
 
 === Resource Injection
@@ -469,6 +533,60 @@ When determining which configuration to use, the extension follows this preceden
 2. **Global `ConfigurationProvider`** registered via ServiceLoader
 3. **Configuration parameters** (`dev.resteasy.junit.extension.*` properties)
 4. **SeBootstrap defaults** (random port, localhost, http, root path /)
+
+=== Choosing Between `value()` and `resources()`
+
+Here's a comparison to help you decide which approach to use:
+
+**Use `resources()` when:**
+
+[source,java]
+----
+// Simple test with just resource classes
+@RestBootstrap(resources = {UserResource.class, OrderResource.class})
+public class SimpleApiTest {
+    @RestResource
+    private WebTarget target;
+
+    @Test
+    public void testGetUser() {
+        Response response = target.path("/users/123").request().get();
+        assertEquals(200, response.getStatus());
+    }
+}
+----
+
+**Use `value()` when you need more control:**
+
+[source,java]
+----
+@ApplicationPath("/api/v1")
+public class MyApplication extends Application {
+    @Override
+    public Set<Class<?>> getClasses() {
+        return Set.of(UserResource.class, OrderResource.class, CustomExceptionMapper.class);
+    }
+
+    @Override
+    public Map<String, Object> getProperties() {
+        // Configure application properties
+        return Map.of("my.custom.property", "value");
+    }
+}
+
+@RestBootstrap(MyApplication.class)
+public class AdvancedApiTest {
+    @RestResource
+    @RequestPath("/api/app/")
+    private WebTarget target;
+
+    @Test
+    public void testGetUser() {
+        Response response = target.path("/users/123").request().get();
+        assertEquals(200, response.getStatus());
+    }
+}
+----
 
 == Examples
 
