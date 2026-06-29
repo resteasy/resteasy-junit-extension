@@ -73,5 +73,5 @@ public @interface RestBootstrap {
      *
      * @return the timeout unit
      */
-    TimeUnit timoutUnit() default TimeUnit.SECONDS;
+    TimeUnit timeoutUnit() default TimeUnit.SECONDS;
 }
