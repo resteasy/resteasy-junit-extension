@@ -7,6 +7,8 @@ package dev.resteasy.junit.extension.extensions;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -16,10 +18,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Application;
 
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.platform.commons.support.AnnotationSupport;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
@@ -35,10 +37,12 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
 
     private final ReadWriteLock lock;
     private final Class<?> testClass;
+    private final RestBootstrap bootstrap;
     private BootstrapHolder holder;
 
-    public InstanceManager(final Class<?> testClass) {
+    public InstanceManager(final Class<?> testClass, final RestBootstrap bootstrap) {
         this.testClass = testClass;
+        this.bootstrap = bootstrap;
         lock = new ReentrantReadWriteLock();
     }
 
@@ -53,27 +57,11 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         return Optional.ofNullable(store.get(MANGER_KEY, InstanceManager.class));
     }
 
-    static Optional<InstanceManager> removeInstance(final ExtensionContext context) {
+    static InstanceManager getOrCreateInstance(final ExtensionContext context, final Class<?> testClass,
+            final RestBootstrap bootstrap) {
         final var store = ClassContext.getStore(context);
-        return Optional.ofNullable(store.remove(MANGER_KEY, InstanceManager.class));
-    }
-
-    static InstanceManager getOrCreateInstance(final ExtensionContext context) {
-        final var store = ClassContext.getStore(context);
-        return store.getOrComputeIfAbsent(MANGER_KEY, key -> new InstanceManager(context.getRequiredTestClass()),
+        return store.getOrComputeIfAbsent(MANGER_KEY, key -> new InstanceManager(testClass, bootstrap),
                 InstanceManager.class);
-    }
-
-    RestBootstrap bootstrap() {
-        lock.readLock().lock();
-        try {
-            if (holder == null) {
-                throw new IllegalStateException("The bootstrap instance has not been started");
-            }
-            return holder.bootstrap;
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     SeBootstrap.Instance instance() {
@@ -99,21 +87,28 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         }
         lock.writeLock().lock();
         try {
-            final Optional<RestBootstrap> bootstrap = AnnotationSupport.findAnnotation(testClass, RestBootstrap.class);
-            if (bootstrap.isEmpty()) {
-                return;
-            }
             holder = new BootstrapHolder();
-            holder.bootstrap = bootstrap.get();
-            final Class<? extends ConfigurationProvider> factoryType = holder.bootstrap.configFactory();
+            final Class<? extends ConfigurationProvider> factoryType = bootstrap.configFactory();
             final ConfigurationProvider factory = Extensions.createProvider(factoryType, ConfigurationProvider.class,
                     DefaultConfigurationProvider::new);
-            holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration(context))
-                    .toCompletableFuture()
-                    .get(holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit());
+            final SeBootstrap.Configuration configuration = factory.getConfiguration(context);
+            final CompletionStage<SeBootstrap.Instance> stage;
+            if (bootstrap.value() == Application.class) {
+                final Set<Class<?>> resources = Set.of(bootstrap.resources());
+                stage = SeBootstrap.start(new Application() {
+                    @Override
+                    public Set<Class<?>> getClasses() {
+                        return resources;
+                    }
+                }, configuration);
+            } else {
+                stage = SeBootstrap.start(bootstrap.value(), configuration);
+            }
+            holder.instance = stage.toCompletableFuture()
+                    .get(bootstrap.timeout(), bootstrap.timeoutUnit());
         } catch (TimeoutException e) {
             throw new AssertionError(String.format("Failed to start the SeBootstrap instance in %d %s",
-                    holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit()
+                    bootstrap.timeout(), bootstrap.timeoutUnit()
                             .toChronoUnit()),
                     e);
         } finally {
@@ -129,11 +124,11 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                 if (holder.instance != null) {
                     holder.instance.stop()
                             .toCompletableFuture()
-                            .get(holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit());
+                            .get(bootstrap.timeout(), bootstrap.timeoutUnit());
                 }
             } catch (TimeoutException e) {
                 throw new AssertionError(String.format("Failed to stop the SeBootstrap instance in %d %s",
-                        holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit()
+                        bootstrap.timeout(), bootstrap.timeoutUnit()
                                 .toChronoUnit()),
                         e);
             } catch (InterruptedException ignore) {
@@ -186,7 +181,6 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
     }
 
     private static class BootstrapHolder implements AutoCloseable {
-        private RestBootstrap bootstrap;
         private SeBootstrap.Instance instance;
         private final Map<String, Client> clients = new ConcurrentHashMap<>();
 
