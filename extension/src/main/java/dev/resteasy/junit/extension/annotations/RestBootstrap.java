@@ -64,7 +64,7 @@ public @interface RestBootstrap {
     /**
      * The timeout used to wait for the {@link SeBootstrap} to start.
      *
-     * @return the timout value
+     * @return the timeout value
      */
     long timeout() default 60L;
 

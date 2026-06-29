@@ -110,10 +110,10 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                     DefaultConfigurationProvider::new);
             holder.instance = SeBootstrap.start(holder.bootstrap.value(), factory.getConfiguration(context))
                     .toCompletableFuture()
-                    .get(holder.bootstrap.timeout(), holder.bootstrap.timoutUnit());
+                    .get(holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit());
         } catch (TimeoutException e) {
             throw new AssertionError(String.format("Failed to start the SeBootstrap instance in %d %s",
-                    holder.bootstrap.timeout(), holder.bootstrap.timoutUnit()
+                    holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit()
                             .toChronoUnit()),
                     e);
         } finally {
@@ -129,11 +129,11 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                 if (holder.instance != null) {
                     holder.instance.stop()
                             .toCompletableFuture()
-                            .get(holder.bootstrap.timeout(), holder.bootstrap.timoutUnit());
+                            .get(holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit());
                 }
             } catch (TimeoutException e) {
                 throw new AssertionError(String.format("Failed to stop the SeBootstrap instance in %d %s",
-                        holder.bootstrap.timeout(), holder.bootstrap.timoutUnit()
+                        holder.bootstrap.timeout(), holder.bootstrap.timeoutUnit()
                                 .toChronoUnit()),
                         e);
             } catch (InterruptedException ignore) {
