@@ -16,7 +16,7 @@
 
     <groupId>dev.resteasy.junit.extension</groupId>
     <artifactId>resteasy-junit-extension-parent</artifactId>
-    <version>1.0.0.Beta3-SNAPSHOT</version>
+    <version>1.0.0.Beta3</version>
     <packaging>pom</packaging>
     <name>RESTEasy JUnit: Parent</name>
     <description>RESTEasy JUnit Parent</description>
@@ -57,7 +57,7 @@
         <connection>scm:git:git://git@github.com:resteasy/resteasy-junit-extension.git</connection>
         <developerConnection>scm:git:git://git@github.com:resteasy/resteasy-junit-extension.git</developerConnection>
         <url>git://github.com/resteasy/resteasy-junit-extension.git</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0.Beta3</tag>
     </scm>
 
     <issueManagement>
@@ -168,9 +168,9 @@
                             <!-- default one fails to process the classes -->
                             <engine>cleanthat-javaparser-unnecessaryimport</engine>
                         </removeUnusedImports>
-                        <forbidWildcardImports/>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
+                        <forbidWildcardImports />
+                        <trimTrailingWhitespace />
+                        <endWithNewline />
                         <licenseHeader>
                             <file>license-java-asl-header</file>
                             <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
@@ -188,8 +188,8 @@
                                 <include>pom.xml</include>
                                 <include>src/**/*.xml</include>
                             </includes>
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
+                            <trimTrailingWhitespace />
+                            <endWithNewline />
                             <licenseHeader>
                                 <file>license-xml-asl-header</file>
                                 <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
