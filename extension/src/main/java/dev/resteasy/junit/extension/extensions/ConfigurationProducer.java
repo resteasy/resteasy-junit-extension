@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import jakarta.ws.rs.SeBootstrap;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 
 import dev.resteasy.junit.extension.api.RestResourceProducer;
 
@@ -31,7 +32,7 @@ public class ConfigurationProducer implements RestResourceProducer {
                     .map(im -> im.instance().configuration())
                     .orElse(null);
         }
-        throw new IllegalArgumentException(
+        throw new ParameterResolutionException(
                 String.format("Type %s is not assignable to %s", clazz.getName(), SeBootstrap.Configuration.class));
     }
 

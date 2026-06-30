@@ -21,7 +21,8 @@
  * </ul>
  *
  * <h2>Usage Example</h2>
- * <pre>{@code
+ * <!-- @formatter:off -->
+ * {@snippet :
  * @RestBootstrap(MyApplication.class)
  * public class HelloResourceTest {
  *
@@ -41,7 +42,8 @@
  *         assertEquals(200, response.getStatus());
  *     }
  * }
- * }</pre>
+ * }
+ * <!-- @formatter:on -->
  *
  * <h2>Exported Packages</h2>
  * <dl>

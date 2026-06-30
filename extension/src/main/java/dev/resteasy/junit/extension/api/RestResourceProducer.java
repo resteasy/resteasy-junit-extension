@@ -44,7 +44,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *     &#64;Override
  *     public Object produce(ExtensionContext context, Class&lt;?&gt; clazz, Annotation... qualifiers) {
  *         if (!canInject(context, clazz, qualifiers)) {
- *             throw new IllegalArgumentException("Cannot produce type: " + clazz);
+ *             throw new ParameterResolutionException("Cannot produce type: " + clazz);
  *         }
  *         // Create and return your DataSource instance
  *         return createDataSource();

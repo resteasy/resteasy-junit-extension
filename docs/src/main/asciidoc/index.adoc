@@ -15,6 +15,7 @@
 :javadoc-url: ../apidocs
 
 [abstract]
+
 == Abstract
 
 RESTEasy JUnit Extension is a JUnit extension that provides seamless integration for testing Jakarta REST applications
@@ -529,10 +530,10 @@ Now all tests without an explicit `configFactory` will use `GlobalPortProvider`.
 
 When determining which configuration to use, the extension follows this precedence (highest to lowest):
 
-1. **Explicit `configFactory`** on `@RestBootstrap` annotation - full control, ignores all other configuration
-2. **Global `ConfigurationProvider`** registered via ServiceLoader
-3. **Configuration parameters** (`dev.resteasy.junit.extension.*` properties)
-4. **SeBootstrap defaults** (random port, localhost, http, root path /)
+. **Explicit `configFactory`** on `@RestBootstrap` annotation - full control, ignores all other configuration
+. **Global `ConfigurationProvider`** registered via ServiceLoader
+. **Configuration parameters** (`dev.resteasy.junit.extension.*` properties)
+. **SeBootstrap defaults** (random port, localhost, http, root path /)
 
 === Choosing Between `value()` and `resources()`
 
