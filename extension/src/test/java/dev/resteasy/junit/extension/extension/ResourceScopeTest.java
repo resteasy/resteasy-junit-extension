@@ -135,7 +135,7 @@ public class ResourceScopeTest {
     /**
      * Test class using DEFAULT-scoped resources.
      */
-    @RestBootstrap(TestApplication.class)
+    @RestBootstrap(application = TestApplication.class)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     @SuppressWarnings("NewClassNamingConvention")
     public static class DefaultScopeTestClass {
@@ -174,7 +174,7 @@ public class ResourceScopeTest {
     /**
      * Test class using CLASS-scoped resources.
      */
-    @RestBootstrap(TestApplication.class)
+    @RestBootstrap(application = TestApplication.class)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     @SuppressWarnings("NewClassNamingConvention")
     public static class ClassScopeTestClass {

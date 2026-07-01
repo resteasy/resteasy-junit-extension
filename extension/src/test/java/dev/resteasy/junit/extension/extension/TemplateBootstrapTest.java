@@ -30,7 +30,7 @@ import dev.resteasy.junit.extension.extension.resources.EchoResource;
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-@RestBootstrap(resources = EchoResource.class)
+@RestBootstrap(value = EchoResource.class)
 class TemplateBootstrapTest {
 
     @RestResource

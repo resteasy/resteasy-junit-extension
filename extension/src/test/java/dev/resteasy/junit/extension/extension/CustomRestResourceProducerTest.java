@@ -81,7 +81,7 @@ public class CustomRestResourceProducerTest {
      * using EngineTestKit to verify that custom producers work end-to-end.
      * </p>
      */
-    @RestBootstrap(TestApplication.class)
+    @RestBootstrap(application = TestApplication.class)
     public static class TestClassUsingCustomProducer {
 
         @RestResource

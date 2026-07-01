@@ -40,7 +40,7 @@ import dev.resteasy.junit.extension.annotations.RestResource;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@RestBootstrap(ArquillianIntegrationTest.SeApplication.class)
+@RestBootstrap(application = ArquillianIntegrationTest.SeApplication.class)
 @ExtendWith(ArquillianExtension.class)
 @ApplicationScoped
 public class ArquillianIntegrationTest {

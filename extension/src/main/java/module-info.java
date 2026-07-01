@@ -23,7 +23,7 @@
  * <h2>Usage Example</h2>
  * <!-- @formatter:off -->
  * {@snippet :
- * @RestBootstrap(MyApplication.class)
+ * @RestBootstrap(HelloResource.class)
  * public class HelloResourceTest {
  *
  *     @RestResource

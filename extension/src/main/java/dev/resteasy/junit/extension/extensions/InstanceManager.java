@@ -100,8 +100,8 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                     DefaultConfigurationProvider::new);
             final SeBootstrap.Configuration configuration = factory.getConfiguration(context);
             final CompletionStage<SeBootstrap.Instance> stage;
-            if (bootstrap.value() == Application.class) {
-                final Set<Class<?>> resources = Set.of(bootstrap.resources());
+            if (bootstrap.application() == Application.class) {
+                final Set<Class<?>> resources = Set.of(bootstrap.value());
                 stage = SeBootstrap.start(new Application() {
                     @Override
                     public Set<Class<?>> getClasses() {
@@ -109,7 +109,7 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                     }
                 }, configuration);
             } else {
-                stage = SeBootstrap.start(bootstrap.value(), configuration);
+                stage = SeBootstrap.start(bootstrap.application(), configuration);
             }
             holder.instance = stage.toCompletableFuture()
                     .get(bootstrap.timeout(), bootstrap.timeoutUnit());

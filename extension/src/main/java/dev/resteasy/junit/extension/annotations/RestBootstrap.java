@@ -29,20 +29,20 @@ import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
  * There are two ways to specify what to bootstrap:
  * </p>
  * <ol>
- * <li><strong>Application class</strong> - Specify a custom {@link Application} class via {@link #value()}:
+ * <li><strong>Application class</strong> - Specify a custom {@link Application} class via {@link #application()}:
  *
  * <pre>
- * &#64;RestBootstrap(MyApplication.class)
+ * &#64;RestBootstrap(application = MyApplication.class)
  * public class MyTest {
  *     // Tests run with MyApplication
  * }
  * </pre>
  *
  * </li>
- * <li><strong>Resource classes</strong> - For simple cases, specify Jakarta REST resource classes via {@link #resources()}:
+ * <li><strong>Resource classes</strong> - For simple cases, specify Jakarta REST resource classes via {@link #value()}:
  *
  * <pre>
- * &#64;RestBootstrap(resources = { UserResource.class, OrderResource.class })
+ * &#64;RestBootstrap({ UserResource.class, OrderResource.class })
  * public class MyTest {
  *     // Tests run with a synthetic Application containing these resources
  * }
@@ -51,7 +51,7 @@ import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
  * </li>
  * </ol>
  * <p>
- * Exactly one of {@link #value()} or {@link #resources()} must be specified. Specifying both or neither will result
+ * Exactly one of {@link #application()} or {@link #value()} must be specified. Specifying both or neither will result
  * in an {@link org.junit.jupiter.api.extension.ExtensionConfigurationException}.
  * </p>
  * <p>
@@ -74,37 +74,21 @@ import dev.resteasy.junit.extension.extensions.UriBuilderParameterResolver;
 public @interface RestBootstrap {
 
     /**
-     * The {@linkplain Application application} to use for
-     * {@linkplain SeBootstrap#start(Class, SeBootstrap.Configuration) starting} a
-     * {@link SeBootstrap.Instance}.
-     * <p>
-     * This is mutually exclusive with {@link #resources()}. Exactly one must be specified.
-     * </p>
-     * <p>
-     * The default value of {@link Application}.class serves as a marker indicating no application was specified.
-     * In this case, {@link #resources()} must be non-empty.
-     * </p>
-     *
-     * @return the application class, or {@link Application}.class if using {@link #resources()} instead
-     */
-    Class<? extends Application> value() default Application.class;
-
-    /**
      * Jakarta REST resource classes to bootstrap for testing.
      * <p>
-     * This provides a simplified alternative to {@link #value()} for common cases where you only need to specify
-     * resource classes without custom {@link Application} configuration. When {@code resources()} is specified,
+     * This provides a simplified alternative to {@link #application()} for common cases where you only need to specify
+     * resource classes without custom {@link Application} configuration. When {@code value()} is specified,
      * the extension creates a synthetic {@link Application} that returns these classes from
      * {@link Application#getClasses()}.
      * </p>
      * <p>
-     * This is mutually exclusive with {@link #value()}. Exactly one must be specified.
+     * This is mutually exclusive with {@link #application()}. Exactly one must be specified.
      * </p>
      *
      * <h3>Example</h3>
      *
      * <pre>
-     * &#64;RestBootstrap(resources = { UserResource.class, OrderResource.class })
+     * &#64;RestBootstrap({ UserResource.class, OrderResource.class })
      * public class SimpleTest {
      *     &#64;RestResource
      *     private Client client;
@@ -117,11 +101,11 @@ public @interface RestBootstrap {
      * </pre>
      *
      * <p>
-     * <strong>When to use {@code resources()} vs {@code value()}:</strong>
+     * <strong>When to use {@code value()} vs {@code application()}:</strong>
      * </p>
      * <ul>
-     * <li>Use {@code resources()} for simple tests that only need to specify resource classes</li>
-     * <li>Use {@code value()} when you need:
+     * <li>Use {@code value()} for simple tests that only need to specify resource classes</li>
+     * <li>Use {@code application()} when you need:
      * <ul>
      * <li>Custom {@link jakarta.ws.rs.ApplicationPath} configuration</li>
      * <li>Custom {@link Application} properties</li>
@@ -130,9 +114,25 @@ public @interface RestBootstrap {
      * </li>
      * </ul>
      *
-     * @return an array of Jakarta REST resource classes, or empty if using {@link #value()} instead
+     * @return an array of Jakarta REST resource classes, or empty if using {@link #application()} instead
      */
-    Class<?>[] resources() default {};
+    Class<?>[] value() default {};
+
+    /**
+     * The {@linkplain Application application} to use for
+     * {@linkplain SeBootstrap#start(Class, SeBootstrap.Configuration) starting} a
+     * {@link SeBootstrap.Instance}.
+     * <p>
+     * This is mutually exclusive with {@link #value()}. Exactly one must be specified.
+     * </p>
+     * <p>
+     * The default value of {@link Application}.class serves as a marker indicating no application was specified.
+     * In this case, {@link #value()} must be non-empty.
+     * </p>
+     *
+     * @return the application class, or {@link Application}.class if using {@link #value()} instead
+     */
+    Class<? extends Application> application() default Application.class;
 
     /**
      * A factory used to be build the {@linkplain SeBootstrap.Configuration configuration} for starting the

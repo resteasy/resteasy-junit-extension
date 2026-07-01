@@ -54,7 +54,7 @@ For simple tests, you can specify resource classes directly:
 
 [source,java]
 ----
-@RestBootstrap(resources = HelloResource.class)
+@RestBootstrap(HelloResource.class)
 public class HelloResourceTest {
 
     @RestResource
@@ -125,7 +125,7 @@ For simple tests, specify Jakarta REST resource classes directly:
 
 [source,java]
 ----
-@RestBootstrap(resources = {UserResource.class, OrderResource.class})
+@RestBootstrap({UserResource.class, OrderResource.class})
 public class MyTest {
     // Tests run with a synthetic Application containing these resources
 }
@@ -139,7 +139,7 @@ For more control, specify a custom `Application` class:
 
 [source,java]
 ----
-@RestBootstrap(MyApplication.class)
+@RestBootstrap(application = MyApplication.class)
 public class MyTest {
     // Tests run with MyApplication
 }
@@ -154,12 +154,12 @@ Use this when you need:
 
 ==== Mutual Exclusivity
 
-**Important:** Exactly one of `value()` or `resources()` must be specified. Specifying both or neither will result in an error.
+**Important:** Exactly one of `value()` or `application()` must be specified. Specifying both or neither will result in an error.
 
 **Attributes:**
 
-* `value` - The Jakarta REST `Application` class to bootstrap (mutually exclusive with `resources`)
-* `resources` - Jakarta REST resource classes to bootstrap (mutually exclusive with `value`)
+* `application` - The Jakarta REST `Application` class to bootstrap (mutually exclusive with `value`)
+* `value` - Jakarta REST resource classes to bootstrap (mutually exclusive with `application`)
 * `configFactory` - Optional `ConfigurationProvider` for custom server configuration
 * `timeout` - Startup/shutdown timeout (default: 60 seconds)
 * `timeoutUnit` - Timeout time unit (default: `SECONDS`)
@@ -555,16 +555,16 @@ When determining which configuration to use, the extension follows this preceden
 . **Configuration parameters** (`dev.resteasy.junit.extension.*` properties)
 . **SeBootstrap defaults** (random port, localhost, http, root path /)
 
-=== Choosing Between `value()` and `resources()`
+=== Choosing Between `value()` and `application()`
 
 Here's a comparison to help you decide which approach to use:
 
-**Use `resources()` when:**
+**Use `value()` when:**
 
 [source,java]
 ----
 // Simple test with just resource classes
-@RestBootstrap(resources = {UserResource.class, OrderResource.class})
+@RestBootstrap({UserResource.class, OrderResource.class})
 public class SimpleApiTest {
     @RestResource
     private WebTarget target;
@@ -577,7 +577,7 @@ public class SimpleApiTest {
 }
 ----
 
-**Use `value()` when you need more control:**
+**Use `application()` when you need more control:**
 
 [source,java]
 ----
@@ -595,7 +595,7 @@ public class MyApplication extends Application {
     }
 }
 
-@RestBootstrap(MyApplication.class)
+@RestBootstrap(application = MyApplication.class)
 public class AdvancedApiTest {
     @RestResource
     @RequestPath("/api/app/")
