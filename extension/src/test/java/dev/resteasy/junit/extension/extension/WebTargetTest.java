@@ -75,4 +75,21 @@ public class WebTargetTest {
         final String uri = echoTarget.getUri().toString();
         Assertions.assertTrue(uri.endsWith("/echo"), () -> String.format("Expected URI to end with /echo but was: %s", uri));
     }
+
+    @Test
+    void checkInstances() {
+        Assertions.assertNotSame(echoTarget, echoTargetNoSlash);
+    }
+
+    @Test
+    void checkInstancesWithParameter(@RestResource @RequestPath("/echo") final WebTarget target) {
+        Assertions.assertNotSame(target, echoTarget);
+        Assertions.assertNotSame(target, echoTargetNoSlash);
+    }
+
+    @Test
+    void checkInstancesWithParameterNoSlash(@RestResource @RequestPath("echo") final WebTarget target) {
+        Assertions.assertNotSame(target, echoTarget);
+        Assertions.assertNotSame(target, echoTargetNoSlash);
+    }
 }

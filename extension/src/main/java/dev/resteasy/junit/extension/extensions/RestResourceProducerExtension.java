@@ -9,10 +9,17 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
+import org.jboss.logging.Logger;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -32,12 +39,16 @@ import dev.resteasy.junit.extension.api.RestResourceProducer;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 public class RestResourceProducerExtension
-        implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
+        implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver {
+    private static final Logger LOGGER = Logger.getLogger(RestResourceProducerExtension.class);
 
     private final ServiceLoader<RestResourceProducer> producers;
+    private final List<AutoCloseable> newResources;
+    private final Lock lock = new ReentrantLock();
 
     public RestResourceProducerExtension() {
         producers = ServiceLoader.load(RestResourceProducer.class);
+        newResources = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -49,6 +60,25 @@ public class RestResourceProducerExtension
     public void beforeEach(final ExtensionContext context) {
         context.getRequiredTestInstances().getAllInstances()
                 .forEach(instance -> injectInstanceFields(context, instance));
+    }
+
+    @Override
+    public void afterEach(final ExtensionContext context) {
+        final List<AutoCloseable> resources;
+        lock.lock();
+        try {
+            resources = List.copyOf(newResources);
+            newResources.clear();
+        } finally {
+            lock.unlock();
+        }
+        resources.forEach(closeable -> {
+            try {
+                closeable.close();
+            } catch (final Exception e) {
+                LOGGER.debugf(e, "Exception while closing %s", closeable);
+            }
+        });
     }
 
     @Override
@@ -127,7 +157,8 @@ public class RestResourceProducerExtension
                                 .getName()));
             }
             try {
-                final Object value = resolveValue(context, resourceProducer, field.getType(), field.getAnnotations(), false);
+                final Object value = resolveValue(context, resourceProducer, field.getType(), field.getAnnotations(), false,
+                        Modifier.isStatic(field.getModifiers()));
                 if (field.trySetAccessible()) {
                     field.set(testInstance, value);
                 } else {
@@ -172,7 +203,29 @@ public class RestResourceProducerExtension
 
     private Object resolveValue(final ExtensionContext context, final RestResourceProducer producer, final Class<?> clazz,
             final Annotation[] annotations, final boolean isParameter) {
+        return resolveValue(context, producer, clazz, annotations, isParameter, false);
+    }
+
+    private Object resolveValue(final ExtensionContext context, final RestResourceProducer producer, final Class<?> clazz,
+            final Annotation[] annotations, final boolean isParameter, final boolean isStatic) {
         final RestResourceProducer.Scope scope = producer.scope();
+        if (scope == RestResourceProducer.Scope.NEW) {
+            final Object value = producer.produce(context, clazz, annotations);
+            if (value instanceof AutoCloseable) {
+                if (isStatic) {
+                    context.getStore(ExtensionContext.Namespace.create(RestResourceProducerExtension.class))
+                            .put(UUID.randomUUID().toString(), value);
+                } else {
+                    lock.lock();
+                    try {
+                        newResources.add((AutoCloseable) value);
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+            }
+            return value;
+        }
         final ExtensionContext.Store store;
         if (scope == RestResourceProducer.Scope.DEFAULT && isParameter) {
             store = context
