@@ -29,13 +29,13 @@ public class SeBootstrapExtension implements BeforeAllCallback {
             return;
         }
         final RestBootstrap restBootstrap = bootstrap.get();
-        // Validate the RestBootstrap annotation. Only the value() or the resources() can be defined, but not both
-        if (restBootstrap.value() == Application.class && restBootstrap.resources().length == 0) {
+        // Validate the RestBootstrap annotation. Only the value() or the application() can be defined, but not both
+        if (restBootstrap.application() == Application.class && restBootstrap.value().length == 0) {
             throw new ExtensionConfigurationException(
-                    "Must define either a Jakarta REST Application in the value or Jakarta REST resources in the resources.");
+                    "Must define either a Jakarta REST Application via application() or Jakarta REST resource classes via value().");
         }
-        if (restBootstrap.value() != Application.class && restBootstrap.resources().length > 0) {
-            throw new ExtensionConfigurationException("Only the value() or resources() is allowed to be defined.");
+        if (restBootstrap.application() != Application.class && restBootstrap.value().length > 0) {
+            throw new ExtensionConfigurationException("Only the value() or application() is allowed to be defined.");
         }
         InstanceManager.getOrCreateInstance(context, testClass, restBootstrap).startInstance(context);
     }

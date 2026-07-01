@@ -27,7 +27,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@RestBootstrap(value = TestApplication.class, configFactory = SeBootstrapTest.PortChangeConfigurationFactory.class)
+@RestBootstrap(application = TestApplication.class, configFactory = SeBootstrapTest.PortChangeConfigurationFactory.class)
 public class SeBootstrapTest {
     public static class PortChangeConfigurationFactory implements ConfigurationProvider {
         @Override

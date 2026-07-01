@@ -26,7 +26,7 @@ import dev.resteasy.junit.extension.annotations.RestResource;
 
 /**
  * Tests validation of {@link RestBootstrap} annotation to ensure mutual exclusivity of {@code value()} and
- * {@code resources()}.
+ * {@code application()}.
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
@@ -49,7 +49,7 @@ public class RestBootstrapValidationTest {
     }
 
     /**
-     * Test class with neither value() nor resources() specified - should fail.
+     * Test class with neither value() nor application() specified - should fail.
      */
     @RestBootstrap
     public static class NeitherSpecifiedTest {
@@ -60,9 +60,9 @@ public class RestBootstrapValidationTest {
     }
 
     /**
-     * Test class with both value() and resources() specified - should fail.
+     * Test class with both value() and application() specified - should fail.
      */
-    @RestBootstrap(value = TestApplication.class, resources = { TestResource.class })
+    @RestBootstrap(application = TestApplication.class, value = TestResource.class)
     public static class BothSpecifiedTest {
         @Test
         public void test() {
@@ -71,10 +71,10 @@ public class RestBootstrapValidationTest {
     }
 
     /**
-     * Test class with only value() specified - should succeed.
+     * Test class with only application() specified - should succeed.
      */
-    @RestBootstrap(TestApplication.class)
-    public static class OnlyValueSpecifiedTest {
+    @RestBootstrap(application = TestApplication.class)
+    public static class OnlyApplicationSpecifiedTest {
 
         @RestResource
         @RequestPath("test-api/test")
@@ -91,10 +91,10 @@ public class RestBootstrapValidationTest {
     }
 
     /**
-     * Test class with only resources() specified - should succeed.
+     * Test class with only value() specified - should succeed.
      */
-    @RestBootstrap(resources = { TestResource.class })
-    public static class OnlyResourcesSpecifiedTest {
+    @RestBootstrap(TestResource.class)
+    public static class OnlyValueSpecifiedTest {
 
         @RestResource
         @RequestPath("test")
@@ -111,7 +111,7 @@ public class RestBootstrapValidationTest {
     }
 
     @Test
-    public void neitherValueNorResourcesSpecified() {
+    public void neitherValueNorApplicationSpecified() {
         final var results = EngineTestKit
                 .engine("junit-jupiter")
                 .selectors(DiscoverySelectors.selectClass(NeitherSpecifiedTest.class))
@@ -132,12 +132,12 @@ public class RestBootstrapValidationTest {
                     return throwable.isPresent()
                             && throwable.get().getMessage()
                                     .contains(
-                                            "Must define either a Jakarta REST Application in the value or Jakarta REST resources in the resources");
+                                            "Must define either a Jakarta REST Application via application() or Jakarta REST resource classes via value().");
                 });
     }
 
     @Test
-    public void bothValueAndResourcesSpecified() {
+    public void bothValueAndApplicationSpecified() {
         final var results = EngineTestKit
                 .engine("junit-jupiter")
                 .selectors(DiscoverySelectors.selectClass(BothSpecifiedTest.class))
@@ -157,8 +157,18 @@ public class RestBootstrapValidationTest {
                             .flatMap(TestExecutionResult::getThrowable);
                     return throwable.isPresent()
                             && throwable.get().getMessage()
-                                    .contains("Only the value() or resources() is allowed to be defined");
+                                    .contains("Only the value() or application() is allowed to be defined");
                 });
+    }
+
+    @Test
+    public void onlyApplicationSpecified() {
+        EngineTestKit
+                .engine("junit-jupiter")
+                .selectors(DiscoverySelectors.selectClass(OnlyApplicationSpecifiedTest.class))
+                .execute()
+                .testEvents()
+                .assertStatistics(stats -> stats.started(1).succeeded(1).failed(0));
     }
 
     @Test
@@ -166,16 +176,6 @@ public class RestBootstrapValidationTest {
         EngineTestKit
                 .engine("junit-jupiter")
                 .selectors(DiscoverySelectors.selectClass(OnlyValueSpecifiedTest.class))
-                .execute()
-                .testEvents()
-                .assertStatistics(stats -> stats.started(1).succeeded(1).failed(0));
-    }
-
-    @Test
-    public void onlyResourcesSpecified() {
-        EngineTestKit
-                .engine("junit-jupiter")
-                .selectors(DiscoverySelectors.selectClass(OnlyResourcesSpecifiedTest.class))
                 .execute()
                 .testEvents()
                 .assertStatistics(stats -> stats.started(1).succeeded(1).failed(0));

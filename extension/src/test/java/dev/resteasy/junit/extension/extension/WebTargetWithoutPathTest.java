@@ -23,7 +23,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-@RestBootstrap(TestApplication.class)
+@RestBootstrap(application = TestApplication.class)
 public class WebTargetWithoutPathTest {
 
     @RestResource

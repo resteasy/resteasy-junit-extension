@@ -26,7 +26,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-@RestBootstrap(TestApplication.class)
+@RestBootstrap(application = TestApplication.class)
 public class MethodScopedResourceTest {
     private static final Path TEMP_FILE = Path.of(System.getProperty("java.io.tmpdir"), "test.tmp");
 

@@ -22,7 +22,7 @@ import dev.resteasy.junit.extension.extension.resources.TestApplication;
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-@RestBootstrap(TestApplication.class)
+@RestBootstrap(application = TestApplication.class)
 public class SharedConfigInstanceTest {
     private static final AtomicReference<Configuration> CONFIGURATION = new AtomicReference<>();
 
@@ -76,7 +76,7 @@ public class SharedConfigInstanceTest {
     }
 
     @Nested
-    @RestBootstrap(value = TestApplication.class, configFactory = SecondInstanceConfigurationProvider.class)
+    @RestBootstrap(application = TestApplication.class, configFactory = SecondInstanceConfigurationProvider.class)
     @Disabled("Disable until we can upgrade to RESTEasy 6.2.17.Final")
     class NestedWithBootstrap {
         @RestResource
