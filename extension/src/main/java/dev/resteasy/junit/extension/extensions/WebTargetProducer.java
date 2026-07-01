@@ -50,4 +50,9 @@ public class WebTargetProducer implements RestResourceProducer {
         }
         throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
     }
+
+    @Override
+    public Scope scope() {
+        return Scope.NEW;
+    }
 }

@@ -128,13 +128,52 @@ public interface RestResourceProducer {
          * <li>Immutable configuration objects</li>
          * </ul>
          * <p>
-         * Built-in producers ({@code Client}, {@code WebTarget}, {@code URI}, {@code Configuration}) use
-         * {@code CLASS} scope for performance.
+         * Built-in producers ({@code Client}, {@code URI}, {@code Configuration}) use {@code CLASS} scope for
+         * performance.
          * </p>
          *
          * @see #DEFAULT
+         * @see #NEW
          */
-        CLASS
+        CLASS,
+
+        /**
+         * Create a new instance for every injection point.
+         * <p>
+         * The producer's {@link #produce(ExtensionContext, Class, Annotation...)} method is invoked every time
+         * the resource is injected, completely bypassing any caching. This means:
+         * </p>
+         * <ul>
+         * <li>Multiple field injections create separate instances</li>
+         * <li>Each method parameter injection creates a fresh instance</li>
+         * <li>No instance is ever shared or reused</li>
+         * </ul>
+         * <p>
+         * This scope is appropriate for mutable or stateful resources that must be isolated between injection
+         * points to prevent cross-contamination or unexpected behavior.
+         * </p>
+         * <p>
+         * <b>Example use cases:</b>
+         * </p>
+         * <ul>
+         * <li>Mutable API clients that maintain request state (e.g., {@code WebTarget})</li>
+         * <li>Builder instances that accumulate state across method calls</li>
+         * <li>Resources with per-injection configuration requirements</li>
+         * </ul>
+         * <p>
+         * <b>Performance consideration:</b> Since {@code produce()} is called for every injection, this scope
+         * should only be used when instance isolation is required. Use {@link #CLASS} for expensive,
+         * thread-safe resources.
+         * </p>
+         * <p>
+         * Built-in producers that use {@code NEW} scope: {@code WebTarget}
+         * </p>
+         *
+         * @see #DEFAULT
+         * @see #CLASS
+         * @since 1.0.0
+         */
+        NEW
     }
 
     /**
