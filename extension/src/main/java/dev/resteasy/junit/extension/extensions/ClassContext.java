@@ -5,7 +5,6 @@
 
 package dev.resteasy.junit.extension.extensions;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,10 +38,11 @@ class ClassContext {
                 ? context.getParent().orElse(context)
                 : context;
         while (current != null) {
-            // Check if this context's test class has @RestBootstrap
-            final Optional<Class<?>> testClass = current.getTestClass();
-            if (testClass.isPresent()) {
-                final Class<?> clazz = testClass.get();
+            // To be a class level context we must have a TestClass, but no method.
+            final boolean isClassContext = current.getTestClass().isPresent() && current.getTestMethod().isEmpty();
+
+            if (isClassContext) {
+                final Class<?> clazz = current.getRequiredTestClass();
                 // Strictly check this specific class, preventing JUnit from reading the enclosing outer class
                 final boolean hasAnnotation = clazz.isAnnotationPresent(RestBootstrap.class) ||
                         Stream.of(clazz.getAnnotations())
