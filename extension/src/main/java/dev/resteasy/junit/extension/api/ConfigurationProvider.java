@@ -53,6 +53,30 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * the global provider will be used automatically for all tests.
  * </p>
  *
+ * <h2>SSL Support</h2>
+ * <p>
+ * When the test class is annotated with
+ * {@link dev.resteasy.junit.extension.annotations.SelfSignedCert @SelfSignedCert}, implementations can receive the
+ * generated certificate by declaring a field annotated with
+ * {@link dev.resteasy.junit.extension.annotations.SslCert @SslCert}:
+ * </p>
+ *
+ * <pre>
+ * public class CustomSslConfigProvider implements ConfigurationProvider {
+ *     &#64;SslCert
+ *     private SelfSignedCertificate certificate;
+ *
+ *     &#64;Override
+ *     public Configuration getConfiguration(ExtensionContext context) {
+ *         return Configuration.builder()
+ *                 .port(9090)
+ *                 .protocol("HTTPS")
+ *                 .sslContext(certificate.serverSslContext())
+ *                 .build();
+ *     }
+ * }
+ * </pre>
+ *
  * <h2>Requirements</h2>
  * <ul>
  * <li>Must have a public no-argument constructor</li>

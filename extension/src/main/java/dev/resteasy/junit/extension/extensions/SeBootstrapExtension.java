@@ -15,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;
 
 import dev.resteasy.junit.extension.annotations.RestBootstrap;
+import dev.resteasy.junit.extension.annotations.SelfSignedCert;
+import dev.resteasy.junit.extension.api.SelfSignedCertificate;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -37,6 +39,11 @@ public class SeBootstrapExtension implements BeforeAllCallback {
         if (restBootstrap.application() != Application.class && restBootstrap.value().length > 0) {
             throw new ExtensionConfigurationException("Only the value() or application() is allowed to be defined.");
         }
-        InstanceManager.getOrCreateInstance(context, testClass, restBootstrap).startInstance(context);
+        final Optional<SelfSignedCert> selfSignedCert = AnnotationSupport.findAnnotation(testClass, SelfSignedCert.class);
+        SelfSignedCertificate certificate = null;
+        if (selfSignedCert.isPresent()) {
+            certificate = DefaultSelfSignedCertificate.getOrCreate(context);
+        }
+        InstanceManager.getOrCreateInstance(context, testClass, restBootstrap, certificate).startInstance(context);
     }
 }

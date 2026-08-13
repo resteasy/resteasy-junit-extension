@@ -18,6 +18,14 @@
  * injection of REST resources (Client, WebTarget, URI, etc.)</li>
  * </ul>
  *
+ * <h2>SSL Annotations</h2>
+ * <ul>
+ * <li>{@link dev.resteasy.junit.extension.annotations.SelfSignedCert @SelfSignedCert} - Generates self-signed
+ * certificates for SSL/TLS testing</li>
+ * <li>{@link dev.resteasy.junit.extension.annotations.SslCert @SslCert} - Marks fields for injection of the generated
+ * {@link dev.resteasy.junit.extension.api.SelfSignedCertificate SelfSignedCertificate}</li>
+ * </ul>
+ *
  * <h2>Qualifier Annotations</h2>
  * <ul>
  * <li>{@link dev.resteasy.junit.extension.annotations.RequestPath @RequestPath} - Qualifies WebTarget or URI injection

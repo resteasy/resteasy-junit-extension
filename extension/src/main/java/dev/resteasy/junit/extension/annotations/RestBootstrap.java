@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.ws.rs.SeBootstrap;
+import jakarta.ws.rs.SeBootstrap.Configuration.SSLClientAuthentication;
 import jakarta.ws.rs.core.Application;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -155,4 +156,32 @@ public @interface RestBootstrap {
      * @return the timeout unit
      */
     TimeUnit timeoutUnit() default TimeUnit.SECONDS;
+
+    /**
+     * The SSL client authentication mode to use when the test class is also annotated with
+     * {@link SelfSignedCert @SelfSignedCert}.
+     * <p>
+     * This controls whether the server requests or requires a client certificate during the TLS handshake:
+     * </p>
+     * <ul>
+     * <li>{@link SSLClientAuthentication#OPTIONAL OPTIONAL} (default) — the server requests a client certificate
+     * but does not require one. This is the recommended default for testing, as the injected
+     * {@link jakarta.ws.rs.client.Client Client} is always configured with the client SSL context.</li>
+     * <li>{@link SSLClientAuthentication#MANDATORY MANDATORY} — the server requires a valid client certificate.
+     * Connections without a client certificate will be rejected.</li>
+     * <li>{@link SSLClientAuthentication#NONE NONE} — the server does not request a client certificate.</li>
+     * </ul>
+     * <p>
+     * This attribute is only used by the default {@link ConfigurationProvider}. Custom providers specified via
+     * {@link #configFactory()} are responsible for their own SSL client authentication configuration.
+     * </p>
+     * <p>
+     * This attribute has no effect if the test class is not annotated with {@link SelfSignedCert @SelfSignedCert}.
+     * </p>
+     *
+     * @return the SSL client authentication mode
+     *
+     * @see SelfSignedCert
+     */
+    SSLClientAuthentication sslClientAuthentication() default SSLClientAuthentication.OPTIONAL;
 }
