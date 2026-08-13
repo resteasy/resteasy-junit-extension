@@ -34,6 +34,7 @@ import dev.resteasy.junit.extension.annotations.RestBootstrap;
 import dev.resteasy.junit.extension.annotations.RestClientConfig;
 import dev.resteasy.junit.extension.api.ConfigurationProvider;
 import dev.resteasy.junit.extension.api.RestClientBuilderProvider;
+import dev.resteasy.junit.extension.api.SelfSignedCertificate;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -45,11 +46,13 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
     private final ReadWriteLock lock;
     private final Class<?> testClass;
     private final RestBootstrap bootstrap;
+    private final SelfSignedCertificate certificate;
     private BootstrapHolder holder;
 
-    public InstanceManager(final Class<?> testClass, final RestBootstrap bootstrap) {
+    public InstanceManager(final Class<?> testClass, final RestBootstrap bootstrap, final SelfSignedCertificate certificate) {
         this.testClass = testClass;
         this.bootstrap = bootstrap;
+        this.certificate = certificate;
         lock = new ReentrantReadWriteLock();
     }
 
@@ -65,9 +68,9 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
     }
 
     static InstanceManager getOrCreateInstance(final ExtensionContext context, final Class<?> testClass,
-            final RestBootstrap bootstrap) {
+            final RestBootstrap bootstrap, final SelfSignedCertificate certificate) {
         final var store = ClassContext.getStore(context);
-        return store.getOrComputeIfAbsent(MANGER_KEY, key -> new InstanceManager(testClass, bootstrap),
+        return store.getOrComputeIfAbsent(MANGER_KEY, key -> new InstanceManager(testClass, bootstrap, certificate),
                 InstanceManager.class);
     }
 
@@ -94,10 +97,17 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         }
         lock.writeLock().lock();
         try {
+            if (holder != null) {
+                return;
+            }
             holder = new BootstrapHolder();
             final Class<? extends ConfigurationProvider> factoryType = bootstrap.configFactory();
             final ConfigurationProvider factory = createProvider(factoryType, ConfigurationProvider.class,
-                    DefaultConfigurationProvider::new);
+                    () -> new DefaultConfigurationProvider(certificate, bootstrap.sslClientAuthentication()));
+            // Inject any SelfSignedCertificate annotated fields
+            if (certificate != null) {
+                SelfSignedCertificateExtension.injectInstanceFields(factory, certificate);
+            }
             final SeBootstrap.Configuration configuration = factory.getConfiguration(context);
             final CompletionStage<SeBootstrap.Instance> stage;
             if (bootstrap.application() == Application.class) {
@@ -176,14 +186,19 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
     }
 
     private Client createClient(final RestClientConfig restClientConfig) {
+        final Supplier<RestClientBuilderProvider> defaultProvider = () -> new DefaultRestClientBuilderProvider(certificate);
+        final RestClientBuilderProvider provider;
         if (restClientConfig == null) {
-            return loadProvider(RestClientBuilderProvider.class, () -> ClientBuilder::newBuilder).getClientBuilder()
-                    .build();
+            provider = loadProvider(RestClientBuilderProvider.class, defaultProvider);
+        } else {
+            final Class<? extends RestClientBuilderProvider> factoryType = restClientConfig.value();
+            provider = createProvider(factoryType, RestClientBuilderProvider.class, defaultProvider);
         }
-        final var factoryType = restClientConfig.value();
-        final var factory = createProvider(factoryType, RestClientBuilderProvider.class,
-                () -> ClientBuilder::newBuilder);
-        final var builder = factory.getClientBuilder();
+        // Inject any SelfSignedCertificate annotated fields
+        if (certificate != null) {
+            SelfSignedCertificateExtension.injectInstanceFields(provider, certificate);
+        }
+        final ClientBuilder builder = provider.getClientBuilder();
         return builder.build();
     }
 
@@ -243,6 +258,23 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                     }
                 }
             }
+        }
+    }
+
+    private static class DefaultRestClientBuilderProvider implements RestClientBuilderProvider {
+        private final SelfSignedCertificate certificate;
+
+        private DefaultRestClientBuilderProvider(final SelfSignedCertificate certificate) {
+            this.certificate = certificate;
+        }
+
+        @Override
+        public ClientBuilder getClientBuilder() {
+            final ClientBuilder clientBuilder = ClientBuilder.newBuilder();
+            if (certificate != null) {
+                clientBuilder.sslContext(certificate.clientSslContext());
+            }
+            return clientBuilder;
         }
     }
 }

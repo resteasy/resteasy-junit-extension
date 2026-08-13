@@ -55,6 +55,28 @@ import jakarta.ws.rs.client.ClientBuilder;
  * be used automatically for all injected Client instances.
  * </p>
  *
+ * <h2>SSL Support</h2>
+ * <p>
+ * When the test class is annotated with
+ * {@link dev.resteasy.junit.extension.annotations.SelfSignedCert @SelfSignedCert}, implementations can receive the
+ * generated certificate by declaring a field annotated with
+ * {@link dev.resteasy.junit.extension.annotations.SslCert @SslCert}:
+ * </p>
+ *
+ * <pre>
+ * public class CustomSslClientProvider implements RestClientBuilderProvider {
+ *     &#64;SslCert
+ *     private SelfSignedCertificate certificate;
+ *
+ *     &#64;Override
+ *     public ClientBuilder getClientBuilder() {
+ *         return ClientBuilder.newBuilder()
+ *                 .sslContext(certificate.clientSslContext())
+ *                 .connectTimeout(5, TimeUnit.SECONDS);
+ *     }
+ * }
+ * </pre>
+ *
  * <h2>Requirements</h2>
  * <ul>
  * <li>Must have a public no-argument constructor</li>

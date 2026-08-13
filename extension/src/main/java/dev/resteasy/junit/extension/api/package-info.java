@@ -10,6 +10,12 @@
  * extension through Service Provider Interfaces (SPI).
  * </p>
  *
+ * <h2>Types</h2>
+ * <ul>
+ * <li>{@link dev.resteasy.junit.extension.api.SelfSignedCertificate SelfSignedCertificate} - Provides access to
+ * generated self-signed certificate artifacts for SSL/TLS testing</li>
+ * </ul>
+ *
  * <h2>SPI Interfaces</h2>
  * <ul>
  * <li>{@link dev.resteasy.junit.extension.api.ConfigurationProvider ConfigurationProvider} - Provides custom

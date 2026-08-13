@@ -161,6 +161,7 @@ Use this when you need:
 * `application` - The Jakarta REST `Application` class to bootstrap (mutually exclusive with `value`)
 * `value` - Jakarta REST resource classes to bootstrap (mutually exclusive with `application`)
 * `configFactory` - Optional `ConfigurationProvider` for custom server configuration
+* `sslClientAuthentication` - SSL client authentication mode when using `@SelfSignedCert` (default: `OPTIONAL`). See <<ssl-testing>>.
 * `timeout` - Startup/shutdown timeout (default: 60 seconds)
 * `timeoutUnit` - Timeout time unit (default: `SECONDS`)
 
@@ -190,6 +191,10 @@ The extension can inject several types into your tests:
 
 |`jakarta.ws.rs.SeBootstrap.Configuration`
 |The SeBootstrap configuration
+|Fields, Parameters
+
+|`dev.resteasy.junit.extension.api.SelfSignedCertificate`
+|Self-signed certificate artifacts (requires `@SelfSignedCert` on class, `@SslCert` on field)
 |Fields, Parameters
 |===
 
@@ -354,6 +359,243 @@ public class CustomPortProvider implements ConfigurationProvider {
 public class CustomPortTest {
     // Tests run on port 9090
     // Configuration parameters are ignored when configFactory is specified
+}
+----
+
+[[ssl-testing]]
+
+=== SSL/TLS Testing
+
+The extension provides built-in support for SSL/TLS testing with self-signed certificates. No external certificate
+setup or keystore configuration is required.
+
+==== Quick Start
+
+Add `@SelfSignedCert` alongside `@RestBootstrap` to start the server on HTTPS with auto-configured SSL:
+
+[source,java]
+----
+@SelfSignedCert
+@RestBootstrap(MyResource.class)
+public class SslTest {
+
+    @RestResource
+    private Client client;  // auto-configured with client SSL context
+
+    @RestResource
+    private URI baseUri;
+
+    @Test
+    public void testHttps() {
+        assertEquals("https", baseUri.getScheme());
+        Response response = client.target(baseUri)
+            .path("/hello")
+            .request()
+            .get();
+        assertEquals(200, response.getStatus());
+    }
+}
+----
+
+When `@SelfSignedCert` is present alongside `@RestBootstrap`, the extension automatically:
+
+* Generates self-signed server and client certificates using the JDK `keytool`
+* Starts the `SeBootstrap` instance with HTTPS and the server SSL context
+* Configures injected `Client` and `WebTarget` instances with the client SSL context
+* Cleans up all generated keystore files after the test run
+* Tags the test class with `ssl-test` for JUnit tag filtering
+
+TIP: Use the `ssl-test` tag to include or exclude SSL tests. For example, with Maven Surefire:
+`mvn test -Dgroups=ssl-test` (run only SSL tests) or `mvn test -DexcludedGroups=ssl-test` (skip SSL tests).
+
+==== Accessing Certificate Artifacts
+
+For advanced scenarios — such as configuring a non-Jakarta REST HTTP client or verifying certificate details — inject the
+`SelfSignedCertificate` using `@SslCert`:
+
+[source,java]
+----
+@SelfSignedCert
+@RestBootstrap(MyResource.class)
+public class SslTest {
+
+    @SslCert
+    private SelfSignedCertificate certificate;
+
+    @RestResource
+    @RequestPath("hello")
+    private URI uri;
+
+    @Test
+    public void testWithHttpClient() throws Exception {
+        HttpClient httpClient = HttpClient.newBuilder()
+            .sslContext(certificate.clientSslContext())
+            .build();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(uri)
+            .GET()
+            .build();
+        HttpResponse<String> response = httpClient.send(request,
+            HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, response.statusCode());
+    }
+
+    @Test
+    public void testWithKeyStoreApi() {
+        try (Client client = ClientBuilder.newBuilder()
+                .keyStore(certificate.clientKeyStore(),
+                    SelfSignedCertificate.KEYSTORE_PASSWORD)
+                .trustStore(certificate.clientTrustStore())
+                .build()) {
+            // Use client...
+        }
+    }
+}
+----
+
+The `SelfSignedCertificate` interface provides:
+
+[cols="1,3"]
+|===
+|Method |Description
+
+|`clientSslContext()` / `serverSslContext()`
+|Pre-configured `SSLContext` instances
+
+|`clientKeyStore()` / `serverKeyStore()`
+|`KeyStore` objects containing the private key and certificate
+
+|`clientTrustStore()` / `serverTrustStore()`
+|`KeyStore` objects containing the trusted peer's certificate
+
+|`clientKeyStorePath()` / `serverKeyStorePath()`
+|`Path` to the keystore files on disk
+
+|`clientTrustStorePath()` / `serverTrustStorePath()`
+|`Path` to the truststore files on disk
+
+|`keyStorePassword()`
+|The password used for all generated stores
+
+|`keyStoreType()`
+|The keystore type (e.g., `PKCS12`)
+|===
+
+==== Standalone Certificate Usage
+
+`@SelfSignedCert` can be used independently of `@RestBootstrap` when only certificate artifacts are needed:
+
+[source,java]
+----
+@SelfSignedCert
+public class StandaloneCertTest {
+
+    @SslCert
+    private SelfSignedCertificate certificate;
+
+    @Test
+    public void testCertificate() {
+        assertNotNull(certificate.serverSslContext());
+        assertNotNull(certificate.clientSslContext());
+        assertTrue(Files.exists(certificate.serverKeyStorePath()));
+    }
+}
+----
+
+==== SSL Client Authentication
+
+The `sslClientAuthentication` attribute on `@RestBootstrap` controls whether the server requires client certificates
+during the TLS handshake:
+
+[source,java]
+----
+@SelfSignedCert
+@RestBootstrap(value = MyResource.class,
+    sslClientAuthentication = SSLClientAuthentication.MANDATORY)
+public class MutualTlsTest {
+
+    @RestResource
+    private Client client;  // configured with full client cert
+
+    @RestResource
+    private URI baseUri;
+
+    @Test
+    public void clientWithCertSucceeds() {
+        // Injected client has client SSL context — succeeds
+        Response response = client.target(baseUri)
+            .path("/hello")
+            .request()
+            .get();
+        assertEquals(200, response.getStatus());
+    }
+}
+----
+
+**Available modes:**
+
+* `SSLClientAuthentication.OPTIONAL` (default) — Server requests a client certificate but does not require one. This
+  is the recommended default since the injected client is always configured with the client SSL context.
+* `SSLClientAuthentication.MANDATORY` — Server requires a valid client certificate. Connections without one are
+  rejected.
+* `SSLClientAuthentication.NONE` — Server does not request a client certificate.
+
+NOTE: The `sslClientAuthentication` attribute is only used by the default `ConfigurationProvider`. Custom providers
+specified via `configFactory` are responsible for their own SSL client authentication configuration.
+
+==== Custom SSL Configuration
+
+For full control over SSL configuration, use `@SslCert` field injection in custom providers:
+
+**Custom Server Configuration:**
+
+[source,java]
+----
+public class CustomSslConfigProvider implements ConfigurationProvider {
+    @SslCert
+    private SelfSignedCertificate certificate;
+
+    @Override
+    public SeBootstrap.Configuration getConfiguration(ExtensionContext context) {
+        return SeBootstrap.Configuration.builder()
+                .protocol("HTTPS")
+                .sslContext(certificate.serverSslContext())
+                .port(9443)
+                .build();
+    }
+}
+
+@SelfSignedCert
+@RestBootstrap(value = MyResource.class,
+    configFactory = CustomSslConfigProvider.class)
+public class CustomSslTest {
+    // Server runs on HTTPS port 9443 with custom configuration
+}
+----
+
+**Custom Client Configuration:**
+
+[source,java]
+----
+public class CustomSslClientProvider implements RestClientBuilderProvider {
+    @SslCert
+    private SelfSignedCertificate certificate;
+
+    @Override
+    public ClientBuilder getClientBuilder() {
+        return ClientBuilder.newBuilder()
+                .sslContext(certificate.clientSslContext())
+                .connectTimeout(5, TimeUnit.SECONDS);
+    }
+}
+
+@SelfSignedCert
+@RestBootstrap(MyResource.class)
+public class CustomSslClientTest {
+
+    @RestResource
+    @RestClientConfig(CustomSslClientProvider.class)
+    private Client sslClient;  // custom SSL + timeout config
 }
 ----
 
@@ -622,6 +864,11 @@ Complete working examples can be found in the link:https://github.com/resteasy/r
 * **`CustomRestResourceProducerTest`** - Custom `RestResourceProducer` implementation
 * **`ResourceScopeTest`** - Resource lifecycle scoping (CLASS vs DEFAULT)
 * **`MethodScopedResourceTest`** - Practical example of method-scoped temporary files
+* **`SslBootstrapTest`** - `@SelfSignedCert` with `@RestBootstrap` for HTTPS testing
+* **`SelfSignedCertStandaloneTest`** - Standalone certificate usage without `@RestBootstrap`
+* **`SslClientAuthenticationTest`** - `SSLClientAuthentication` modes (OPTIONAL, MANDATORY, NONE)
+* **`SslCustomConfigProviderTest`** - Custom `ConfigurationProvider` with `@SslCert` injection
+* **`SslCustomClientProviderTest`** - Custom `RestClientBuilderProvider` with `@SslCert` injection
 
 == Configuration Reference
 
@@ -701,6 +948,20 @@ A: Ensure your test class is annotated with `@RestBootstrap` and that you have a
 **Q: Can nested test classes have different configurations?**
 
 A: Yes! Add `@RestBootstrap` with a custom `configFactory` to the nested class. However, note that some Jakarta REST implementations (like RESTEasy with CDI) may not support running multiple `SeBootstrap` instances simultaneously due to singleton container limitations.
+
+**Q: How do I test with HTTPS/SSL?**
+
+A: Add `@SelfSignedCert` alongside `@RestBootstrap` on your test class. The extension generates self-signed certificates and configures HTTPS automatically. See <<ssl-testing>> for details and examples.
+
+**Q: Can I use my own certificates instead of auto-generated ones?**
+
+A: Yes. Implement a custom `ConfigurationProvider` (for the server) and/or `RestClientBuilderProvider` (for the client) with your own SSL configuration. You do not need `@SelfSignedCert` when providing your own certificates.
+
+**Q: Are self-signed certificates shared across test classes?**
+
+A: Yes. Certificates are generated once per JVM and stored in the root extension context. All test classes annotated
+with `@SelfSignedCert` share the same certificate artifacts. This avoids the overhead of running `keytool` for every
+test class.
 
 **Q: When are injected resources cleaned up?**
 
