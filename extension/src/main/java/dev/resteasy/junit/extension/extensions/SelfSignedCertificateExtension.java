@@ -64,11 +64,13 @@ public class SelfSignedCertificateExtension implements BeforeAllCallback, Before
     @Override
     public Object resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        if (SelfSignedCertificate.class.isAssignableFrom(parameterContext.getParameter().getType())) {
-            return DefaultSelfSignedCertificate.get(extensionContext);
+        final SelfSignedCertificate cert = DefaultSelfSignedCertificate.get(extensionContext);
+        if (cert == null) {
+            throw new ParameterResolutionException(
+                    "Test class must be annotated with @SelfSignedCert to inject SelfSignedCertificate");
         }
-        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s",
-                parameterContext.getParameter().getType().getName(), SelfSignedCertificate.class.getName()));
+        return cert;
+
     }
 
     static void injectInstanceFields(final Object instance, final SelfSignedCertificate value) {

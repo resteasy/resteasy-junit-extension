@@ -273,7 +273,6 @@ class DefaultSelfSignedCertificate implements SelfSignedCertificate, AutoCloseab
 
         @Override
         public DefaultSelfSignedCertificate apply(final String s) {
-            @SuppressWarnings("resource")
             final ForkJoinPool executor = ForkJoinPool.commonPool();
             try {
                 final Path tempDir = Files.createTempDirectory("resteasy-ssl-");
@@ -293,7 +292,8 @@ class DefaultSelfSignedCertificate implements SelfSignedCertificate, AutoCloseab
                             "-storetype", KEYSTORE_TYPE,
                             "-keystore", serverKeyStoreFile.toString(),
                             "-storepass", KEYSTORE_PASSWORD,
-                            "-dname", SERVER_DN);
+                            "-dname", SERVER_DN,
+                            "-ext", "SAN=dns:localhost,ip:127.0.0.1");
                     keytool(executor, "-exportcert", "-alias", ALIAS,
                             "-keystore", serverKeyStoreFile.toString(),
                             "-storepass", KEYSTORE_PASSWORD,
@@ -305,7 +305,8 @@ class DefaultSelfSignedCertificate implements SelfSignedCertificate, AutoCloseab
                             "-storetype", KEYSTORE_TYPE,
                             "-keystore", clientKeyStoreFile.toString(),
                             "-storepass", KEYSTORE_PASSWORD,
-                            "-dname", CLIENT_DN);
+                            "-dname", CLIENT_DN,
+                            "-ext", "SAN=dns:localhost,ip:127.0.0.1");
                     keytool(executor, "-exportcert", "-alias", ALIAS,
                             "-keystore", clientKeyStoreFile.toString(),
                             "-storepass", KEYSTORE_PASSWORD,

@@ -56,7 +56,7 @@ import javax.net.ssl.SSLContext;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @see dev.resteasy.junit.extension.annotations.SelfSignedCert
  * @see dev.resteasy.junit.extension.annotations.SslCert
- * @since 1.0.0
+ * @since 1.0
  */
 public interface SelfSignedCertificate {
 

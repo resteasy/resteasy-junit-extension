@@ -43,9 +43,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *
  *     &#64;Override
  *     public Object produce(ExtensionContext context, Class&lt;?&gt; clazz, Annotation... qualifiers) {
- *         if (!canInject(context, clazz, qualifiers)) {
- *             throw new ParameterResolutionException("Cannot produce type: " + clazz);
- *         }
  *         // Create and return your DataSource instance
  *         return createDataSource();
  *     }
@@ -82,7 +79,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @see dev.resteasy.junit.extension.annotations.RestResource
- * @since 1.0.0
+ * @since 1.0
  */
 public interface RestResourceProducer {
 
@@ -93,7 +90,7 @@ public interface RestResourceProducer {
      * This allows producers to balance performance (class-scoped reuse) with isolation (method-scoped cleanup).
      * </p>
      *
-     * @since 1.0.0
+     * @since 1.0
      */
     enum Scope {
         /**
@@ -171,7 +168,7 @@ public interface RestResourceProducer {
          *
          * @see #DEFAULT
          * @see #CLASS
-         * @since 1.0.0
+         * @since 1.0
          */
         NEW
     }

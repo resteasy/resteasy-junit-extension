@@ -121,7 +121,10 @@ public class RestResourceProducerExtension
             // Pass the lexical context to the producer!
             return resolveValue(lexicalContext, producer, parameterContext.getParameter()
                     .getType(), parameterContext.getParameter().getAnnotations(), true);
-        } catch (Throwable e) {
+        } catch (Exception e) {
+            if (e instanceof ParameterResolutionException) {
+                throw (ParameterResolutionException) e;
+            }
             throw new ParameterResolutionException(
                     String.format("Failed to resolve parameter '%s'.", parameterContext.getParameter()), e);
         }
@@ -162,14 +165,14 @@ public class RestResourceProducerExtension
                 if (field.trySetAccessible()) {
                     field.set(testInstance, value);
                 } else {
-                    throw new ParameterResolutionException(
+                    throw new ExtensionConfigurationException(
                             String.format("Could not make field %s accessible for injection.", field));
                 }
             } catch (Throwable e) {
-                if (e instanceof ParameterResolutionException) {
-                    throw (ParameterResolutionException) e;
+                if (e instanceof ExtensionConfigurationException) {
+                    throw (ExtensionConfigurationException) e;
                 }
-                throw new ParameterResolutionException(
+                throw new ExtensionConfigurationException(
                         String.format("Could not make field %s accessible for injection.", field), e);
             }
         });

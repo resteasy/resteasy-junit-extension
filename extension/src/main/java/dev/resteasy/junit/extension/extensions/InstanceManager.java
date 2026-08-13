@@ -129,6 +129,10 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
                             .toChronoUnit()),
                     e);
         } finally {
+            // Clear the holder if an error occurred.
+            if (holder != null && holder.instance == null) {
+                holder = null;
+            }
             lock.writeLock().unlock();
         }
     }
@@ -137,11 +141,14 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         if (holder != null) {
             lock.writeLock().lock();
             try {
-                holder.close();
-                if (holder.instance != null) {
-                    holder.instance.stop()
-                            .toCompletableFuture()
-                            .get(bootstrap.timeout(), bootstrap.timeoutUnit());
+                try {
+                    if (holder.instance != null) {
+                        holder.instance.stop()
+                                .toCompletableFuture()
+                                .get(bootstrap.timeout(), bootstrap.timeoutUnit());
+                    }
+                } finally {
+                    holder.close();
                 }
             } catch (TimeoutException e) {
                 throw new ExtensionContextException(String.format("Failed to stop the SeBootstrap instance in %d %s",

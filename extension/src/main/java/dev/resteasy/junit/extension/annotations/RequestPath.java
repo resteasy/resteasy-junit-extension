@@ -46,6 +46,7 @@ import jakarta.ws.rs.SeBootstrap;
  * </pre>
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ * @since 1.0
  */
 @Inherited
 @Documented

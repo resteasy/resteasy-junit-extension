@@ -27,19 +27,16 @@ public class UriProducer implements RestResourceProducer {
 
     @Override
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
-        if (URI.class.isAssignableFrom(clazz)) {
-            final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
-            @SuppressWarnings("resource")
-            final UriBuilder uriBuilder = InstanceManager.getInstance(context)
-                    .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"))
-                    .instance()
-                    .configuration()
-                    .baseUriBuilder();
-            if (requestPath != null) {
-                return uriBuilder.path(requestPath.value()).build();
-            }
-            return uriBuilder.build();
+        final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
+        @SuppressWarnings("resource")
+        final UriBuilder uriBuilder = InstanceManager.getInstance(context)
+                .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"))
+                .instance()
+                .configuration()
+                .baseUriBuilder();
+        if (requestPath != null) {
+            return uriBuilder.path(requestPath.value()).build();
         }
-        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), URI.class));
+        return uriBuilder.build();
     }
 }

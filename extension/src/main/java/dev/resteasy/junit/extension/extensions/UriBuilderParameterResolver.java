@@ -25,12 +25,8 @@ public class UriBuilderParameterResolver implements ParameterResolver {
     @Override
     public Object resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        if (UriBuilder.class.isAssignableFrom(parameterContext.getParameter().getType())) {
-            return InstanceManager.getInstance(extensionContext)
-                    .map(im -> im.instance().configuration().baseUriBuilder())
-                    .orElseThrow(() -> new ParameterResolutionException("Failed to lookup URI builder instance."));
-        }
-        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s",
-                parameterContext.getParameter().getType().getName(), UriBuilder.class.getName()));
+        return InstanceManager.getInstance(extensionContext)
+                .map(im -> im.instance().configuration().baseUriBuilder())
+                .orElseThrow(() -> new ParameterResolutionException("Failed to lookup URI builder instance."));
     }
 }

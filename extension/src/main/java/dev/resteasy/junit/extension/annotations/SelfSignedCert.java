@@ -74,7 +74,7 @@ import dev.resteasy.junit.extension.extensions.SelfSignedCertificateExtension;
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  * @see SslCert
  * @see dev.resteasy.junit.extension.api.SelfSignedCertificate
- * @since 1.0.0
+ * @since 1.0
  */
 @Inherited
 @Documented

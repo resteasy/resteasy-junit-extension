@@ -26,15 +26,12 @@ public class RestClientProducer implements RestResourceProducer {
 
     @Override
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
-        if (Client.class.isAssignableFrom(clazz)) {
-            final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
-            // Get the InstanceManager for this test class and ask it for a Client
-            @SuppressWarnings("resource")
-            final InstanceManager instanceManager = InstanceManager.getInstance(context)
-                    .orElseThrow(() -> new ParameterResolutionException("No SeBootstrap instance available"));
-            return instanceManager.getOrCreateClient(restClient);
-        }
-        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
+        final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
+        // Get the InstanceManager for this test class and ask it for a Client
+        @SuppressWarnings("resource")
+        final InstanceManager instanceManager = InstanceManager.getInstance(context)
+                .orElseThrow(() -> new ParameterResolutionException("No SeBootstrap instance available"));
+        return instanceManager.getOrCreateClient(restClient);
     }
 
     @Override
