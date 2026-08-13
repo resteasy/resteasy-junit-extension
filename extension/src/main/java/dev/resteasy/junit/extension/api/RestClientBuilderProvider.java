@@ -86,7 +86,7 @@ import jakarta.ws.rs.client.ClientBuilder;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @see dev.resteasy.junit.extension.annotations.RestClientConfig
- * @since 1.0.0
+ * @since 1.0
  */
 @FunctionalInterface
 public interface RestClientBuilderProvider {

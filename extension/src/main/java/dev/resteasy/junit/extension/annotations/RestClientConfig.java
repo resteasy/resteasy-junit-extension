@@ -23,6 +23,7 @@ import dev.resteasy.junit.extension.api.RestClientBuilderProvider;
  * </p>
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ * @since 1.0
  */
 @Inherited
 @Documented

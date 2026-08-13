@@ -33,22 +33,19 @@ public class WebTargetProducer implements RestResourceProducer {
     @Override
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers)
             throws IllegalArgumentException {
-        if (WebTarget.class.isAssignableFrom(clazz)) {
-            final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
-            @SuppressWarnings("resource")
-            final InstanceManager instanceManager = InstanceManager.getInstance(context)
-                    .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"));
-            final Client client = instanceManager.getOrCreateClient(restClient);
-            final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
-            final UriBuilder uriBuilder = instanceManager.instance()
-                    .configuration()
-                    .baseUriBuilder();
-            if (requestPath != null) {
-                return client.target(uriBuilder).path(requestPath.value());
-            }
-            return client.target(uriBuilder);
+        final RestClientConfig restClient = Extensions.findQualifier(RestClientConfig.class, qualifiers);
+        @SuppressWarnings("resource")
+        final InstanceManager instanceManager = InstanceManager.getInstance(context)
+                .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"));
+        final Client client = instanceManager.getOrCreateClient(restClient);
+        final RequestPath requestPath = Extensions.findQualifier(RequestPath.class, qualifiers);
+        final UriBuilder uriBuilder = instanceManager.instance()
+                .configuration()
+                .baseUriBuilder();
+        if (requestPath != null) {
+            return client.target(uriBuilder).path(requestPath.value());
         }
-        throw new ParameterResolutionException(String.format("Type %s is not assignable to %s", clazz.getName(), Client.class));
+        return client.target(uriBuilder);
     }
 
     @Override

@@ -86,7 +86,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @see dev.resteasy.junit.extension.annotations.RestBootstrap#configFactory()
- * @since 1.0.0
+ * @since 1.0
  */
 @FunctionalInterface
 public interface ConfigurationProvider {

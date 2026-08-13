@@ -27,13 +27,9 @@ public class ConfigurationProducer implements RestResourceProducer {
 
     @Override
     public Object produce(final ExtensionContext context, final Class<?> clazz, final Annotation... qualifiers) {
-        if (SeBootstrap.Configuration.class.isAssignableFrom(clazz)) {
-            return InstanceManager.getInstance(context)
-                    .map(im -> im.instance().configuration())
-                    .orElse(null);
-        }
-        throw new ParameterResolutionException(
-                String.format("Type %s is not assignable to %s", clazz.getName(), SeBootstrap.Configuration.class));
+        return InstanceManager.getInstance(context)
+                .map(im -> im.instance().configuration())
+                .orElseThrow(() -> new ParameterResolutionException("Could not find associated SeBootstrap instance"));
     }
 
     @Override
