@@ -171,31 +171,33 @@ The extension can inject several types into your tests:
 
 [cols="1,3,1"]
 |===
-|Type |Description |Injection Points
+| Type
+| Description
+| Injection Points
 
-|`jakarta.ws.rs.client.Client`
-|REST client for making HTTP requests
-|Fields, Parameters
+| `jakarta.ws.rs.client.Client`
+| REST client for making HTTP requests
+| Fields, Parameters
 
-|`jakarta.ws.rs.client.WebTarget`
-|WebTarget, optionally qualified with `@RequestPath`
-|Fields, Parameters
+| `jakarta.ws.rs.client.WebTarget`
+| WebTarget, optionally qualified with `@RequestPath`
+| Fields, Parameters
 
-|`java.net.URI`
-|Server base URI, optionally qualified with `@RequestPath`
-|Fields, Parameters
+| `java.net.URI`
+| Server base URI, optionally qualified with `@RequestPath`
+| Fields, Parameters
 
-|`jakarta.ws.rs.core.UriBuilder`
-|URI builder for constructing URIs (mutable, always fresh)
-|**Parameters only**
+| `jakarta.ws.rs.core.UriBuilder`
+| URI builder for constructing URIs (mutable, always fresh)
+| **Parameters only**
 
-|`jakarta.ws.rs.SeBootstrap.Configuration`
-|The SeBootstrap configuration
-|Fields, Parameters
+| `jakarta.ws.rs.SeBootstrap.Configuration`
+| The SeBootstrap configuration
+| Fields, Parameters
 
-|`dev.resteasy.junit.extension.api.SelfSignedCertificate`
-|Self-signed certificate artifacts (requires `@SelfSignedCert` on class, `@SslCert` on field)
-|Fields, Parameters
+| `dev.resteasy.junit.extension.api.SelfSignedCertificate`
+| Self-signed certificate artifacts (requires `@SelfSignedCert` on class, `@SslCert` on field)
+| Fields, Parameters
 |===
 
 NOTE: `UriBuilder` is only available for method/constructor parameters and does not require the `@RestResource` annotation. Due to its mutable nature, a fresh instance is created for each parameter.
@@ -457,28 +459,29 @@ The `SelfSignedCertificate` interface provides:
 
 [cols="1,3"]
 |===
-|Method |Description
+| Method
+| Description
 
-|`clientSslContext()` / `serverSslContext()`
-|Pre-configured `SSLContext` instances
+| `clientSslContext()` / `serverSslContext()`
+| Pre-configured `SSLContext` instances
 
-|`clientKeyStore()` / `serverKeyStore()`
-|`KeyStore` objects containing the private key and certificate
+| `clientKeyStore()` / `serverKeyStore()`
+| `KeyStore` objects containing the private key and certificate
 
-|`clientTrustStore()` / `serverTrustStore()`
-|`KeyStore` objects containing the trusted peer's certificate
+| `clientTrustStore()` / `serverTrustStore()`
+| `KeyStore` objects containing the trusted peer's certificate
 
-|`clientKeyStorePath()` / `serverKeyStorePath()`
-|`Path` to the keystore files on disk
+| `clientKeyStorePath()` / `serverKeyStorePath()`
+| `Path` to the keystore files on disk
 
-|`clientTrustStorePath()` / `serverTrustStorePath()`
-|`Path` to the truststore files on disk
+| `clientTrustStorePath()` / `serverTrustStorePath()`
+| `Path` to the truststore files on disk
 
-|`keyStorePassword()`
-|The password used for all generated stores
+| `keyStorePassword()`
+| The password used for all generated stores
 
-|`keyStoreType()`
-|The keystore type (e.g., `PKCS12`)
+| `keyStoreType()`
+| The keystore type (e.g., `PKCS12`)
 |===
 
 ==== Standalone Certificate Usage
@@ -878,23 +881,25 @@ The extension supports the following JUnit configuration parameters. These can b
 
 [cols="2,3,1"]
 |===
-|Parameter |Description |Default
+| Parameter
+| Description
+| Default
 
-|`dev.resteasy.junit.extension.protocol`
-|Protocol (http/https)
-|http
+| `dev.resteasy.junit.extension.protocol`
+| Protocol (http/https)
+| http
 
-|`dev.resteasy.junit.extension.host`
-|Server host
-|localhost
+| `dev.resteasy.junit.extension.host`
+| Server host
+| localhost
 
-|`dev.resteasy.junit.extension.port`
-|Server port (integer)
-|Random available port
+| `dev.resteasy.junit.extension.port`
+| Server port (integer)
+| Random available port
 
-|`dev.resteasy.junit.extension.root-path`
-|Application root path
-|/
+| `dev.resteasy.junit.extension.root-path`
+| Application root path
+| /
 |===
 
 **Usage examples:**
