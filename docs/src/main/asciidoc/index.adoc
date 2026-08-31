@@ -310,6 +310,36 @@ public class CustomClientTest {
 }
 ----
 
+==== Registering Providers Inline
+
+For simple cases — registering a filter, interceptor, or message body reader/writer — you can list the provider classes
+directly on the annotation instead of implementing a `RestClientBuilderProvider`:
+
+[source,java]
+----
+@RestBootstrap(MyApp.class)
+public class ProviderTest {
+
+    @RestResource
+    @RestClientConfig(providers = { LoggingFilter.class, AuthFilter.class })
+    private Client client;
+}
+----
+
+Each provider is registered via `ClientBuilder.register(Class)`, so it must have a public, no-argument constructor. A
+provider that requires constructor arguments or additional setup should be registered through a
+`RestClientBuilderProvider` instead.
+
+Providers listed here are registered _after_ the `value()` provider (if one is specified) has configured the builder, so
+a shared configuration provider can be combined with one or more providers specified at the injection point:
+
+[source,java]
+----
+@RestResource
+@RestClientConfig(value = CustomTimeoutProvider.class, providers = LoggingFilter.class)
+private Client client;
+----
+
 === Custom Server Configuration
 
 ==== Using Configuration Parameters

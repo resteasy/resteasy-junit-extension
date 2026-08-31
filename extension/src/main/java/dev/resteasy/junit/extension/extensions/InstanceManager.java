@@ -20,6 +20,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
@@ -189,7 +191,15 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
         if (restClientConfig == null) {
             return "default";
         }
-        return "config-" + System.identityHashCode(restClientConfig.value());
+        final String providerKey;
+        if (restClientConfig.providers().length == 0) {
+            providerKey = "";
+        } else {
+            providerKey = "-" + Stream.of(restClientConfig.providers())
+                    .map(Class::getName)
+                    .collect(Collectors.joining(","));
+        }
+        return "config-" + restClientConfig.value().getName() + providerKey;
     }
 
     private Client createClient(final RestClientConfig restClientConfig) {
@@ -206,6 +216,12 @@ class InstanceManager implements ExtensionContext.Store.CloseableResource, AutoC
             SelfSignedCertificateExtension.injectInstanceFields(provider, certificate);
         }
         final ClientBuilder builder = provider.getClientBuilder();
+        if (restClientConfig != null) {
+            final Class<?>[] providers = restClientConfig.providers();
+            for (Class<?> providerClass : providers) {
+                builder.register(providerClass);
+            }
+        }
         return builder.build();
     }
 
