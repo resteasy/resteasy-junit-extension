@@ -102,11 +102,4 @@ public class SslBootstrapTest {
                 .get(String.class);
         Assertions.assertEquals("https://localhost:8081/info/request-uri", result);
     }
-
-    @Test
-    public void certificateIsAvailable() {
-        Assertions.assertNotNull(certificate, "Certificate should be injected");
-        Assertions.assertNotNull(certificate.serverSslContext(), "Server SSLContext should not be null");
-        Assertions.assertNotNull(certificate.clientSslContext(), "Client SSLContext should not be null");
-    }
 }

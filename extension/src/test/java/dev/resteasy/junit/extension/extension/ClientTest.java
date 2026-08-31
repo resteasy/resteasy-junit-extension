@@ -8,6 +8,7 @@ package dev.resteasy.junit.extension.extension;
 import jakarta.ws.rs.SeBootstrap;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -72,10 +73,11 @@ public class ClientTest {
     }
 
     private static void assertClientAvailable(final Client client) {
-        var result = client.target(CONFIGURATION.baseUriBuilder().path("/echo")).request()
-                .post(Entity.text("Hello1"));
-        Assertions.assertEquals(200, result.getStatus(), () -> String.format("Expected a 200 response, but got %d: %s",
-                result.getStatus(), result.readEntity(String.class)));
-        Assertions.assertEquals("Hello1", result.readEntity(String.class));
+        try (Response result = client.target(CONFIGURATION.baseUriBuilder().path("/echo")).request()
+                .post(Entity.text("Hello1"))) {
+            Assertions.assertEquals(200, result.getStatus(), () -> String.format("Expected a 200 response, but got %d: %s",
+                    result.getStatus(), result.readEntity(String.class)));
+            Assertions.assertEquals("Hello1", result.readEntity(String.class));
+        }
     }
 }

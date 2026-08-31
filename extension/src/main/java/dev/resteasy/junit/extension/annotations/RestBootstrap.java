@@ -87,7 +87,7 @@ public @interface RestBootstrap {
      * This is mutually exclusive with {@link #application()}. Exactly one must be specified.
      * </p>
      *
-     * <h3>Example</h3>
+     * <h4>Example</h4>
      *
      * <pre>
      * &#64;RestBootstrap({ UserResource.class, OrderResource.class })

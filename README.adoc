@@ -25,7 +25,7 @@ The first dependency you need is the JUnit extension.
     <dependency>
         <groupId>dev.resteasy.junit.extension</groupId>
         <artifactId>resteasy-junit-extension</artifactId>
-        <version>${version.dev.resteasy.junit.extension</version>
+        <version>${version.dev.resteasy.junit.extension}</version>
     </dependency>
 </dependencies>
 ----
@@ -195,12 +195,10 @@ Once everything is setup, you simply need to run the `./release.sh` script. Ther
 
 By default the release version cannot contain `SNAPSHOT` and the development version, must container `SNAPSHOT`.
 
+.Example Command
 [source,bash]
 ----
-.Example Command
-----
-./release -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
-----
+./release.sh -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
 ----
 
 === Supported Arguments

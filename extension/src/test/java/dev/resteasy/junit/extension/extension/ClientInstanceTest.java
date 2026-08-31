@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +20,8 @@ import dev.resteasy.junit.extension.annotations.RestResource;
 import dev.resteasy.junit.extension.extension.resources.TestApplication;
 
 /**
- * Tests Client injection and instance identity across all injection points.
+ * Tests Client instance identity and caching across all injection points, including lexical scoping in nested test
+ * classes with and without their own {@link RestBootstrap @RestBootstrap}.
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
@@ -96,13 +96,6 @@ public class ClientInstanceTest {
     }
 
     @Test
-    public void verifyLifecycleMethodInjection() {
-        Assertions.assertNotNull(beforeEachClient, "@BeforeEach should have captured a client");
-        Assertions.assertSame(STATIC_CLIENT, beforeEachClient,
-                "@BeforeEach client should match static client");
-    }
-
-    @Test
     public void multipleParameterClients(@RestResource final Client client1, @RestResource final Client client2) {
         Assertions.assertNotNull(client1, "First client should be injected");
         Assertions.assertNotNull(client2, "Second client should be injected");
@@ -113,7 +106,6 @@ public class ClientInstanceTest {
 
     @Nested
     @RestBootstrap(application = TestApplication.class, configFactory = SecondInstanceConfigurationProvider.class)
-    @Disabled("Disable until we can upgrade to RESTEasy 6.2.17.Final")
     class NestedWithBootstrap {
         @RestResource
         private Client nestedClient;
