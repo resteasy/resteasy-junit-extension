@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <pre>
  * public class CustomPortProvider implements ConfigurationProvider {
  *     &#64;Override
- *     public Configuration getConfiguration() {
+ *     public Configuration getConfiguration(ExtensionContext context) {
  *         return Configuration.builder()
  *                 .port(9090)
  *                 .build();

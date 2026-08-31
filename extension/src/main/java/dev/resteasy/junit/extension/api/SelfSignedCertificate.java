@@ -7,7 +7,6 @@ package dev.resteasy.junit.extension.api;
 
 import java.nio.file.Path;
 import java.security.KeyStore;
-import java.util.UUID;
 
 import javax.net.ssl.SSLContext;
 
@@ -59,16 +58,6 @@ import javax.net.ssl.SSLContext;
  * @since 1.0
  */
 public interface SelfSignedCertificate {
-
-    /**
-     * The password used for all generated keystore and truststore files.
-     * <p>
-     * A random value is generated. This constant is provided for convenience when using APIs that require the
-     * password directly, such as
-     * {@link jakarta.ws.rs.client.ClientBuilder#keyStore(KeyStore, char[]) ClientBuilder.keyStore()}.
-     * </p>
-     */
-    String KEYSTORE_PASSWORD = UUID.randomUUID().toString();
 
     /**
      * Returns the {@link SSLContext} configured for the client.

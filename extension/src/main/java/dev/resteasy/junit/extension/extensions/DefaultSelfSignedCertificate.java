@@ -17,6 +17,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,7 @@ class DefaultSelfSignedCertificate implements SelfSignedCertificate, AutoCloseab
     private static final String CLIENT_DN = "CN=localhost, OU=Test, L=Test, ST=Test, C=Test";
     private static final String SERVER_DN = "CN=localhost, OU=Unknown, L=Unknown, ST=Unknown, C=Unknown";
     private static final String KEYSTORE_TYPE = "PKCS12";
+    private static final String KEYSTORE_PASSWORD = UUID.randomUUID().toString();
 
     private final Path tempDir;
     private final SslContextHolder serverHolder;

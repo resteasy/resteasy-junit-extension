@@ -68,7 +68,7 @@
  * </ul>
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
- * @since 1.0.0
+ * @since 1.0
  * @see dev.resteasy.junit.extension.annotations.RestBootstrap
  * @see dev.resteasy.junit.extension.annotations.RestResource
  */

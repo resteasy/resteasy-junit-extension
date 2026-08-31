@@ -168,7 +168,6 @@ public interface RestResourceProducer {
          *
          * @see #DEFAULT
          * @see #CLASS
-         * @since 1.0
          */
         NEW
     }

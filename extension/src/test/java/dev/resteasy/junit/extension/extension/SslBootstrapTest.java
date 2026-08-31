@@ -76,7 +76,7 @@ public class SslBootstrapTest {
     @Test
     public void checkRestClientBuilder(@RestResource @RequestPath("/info/request-uri") final URI uri) {
         try (Client client = ClientBuilder.newBuilder()
-                .keyStore(certificate.clientKeyStore(), SelfSignedCertificate.KEYSTORE_PASSWORD)
+                .keyStore(certificate.clientKeyStore(), certificate.keyStorePassword())
                 .trustStore(certificate.clientTrustStore())
                 .build()) {
             final String result = client.target(uri)
