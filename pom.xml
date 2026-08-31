@@ -76,7 +76,7 @@
         <version.org.junit>5.14.4</version.org.junit>
 
         <!-- Plugin versions -->
-        <version.spotless-maven-plugin>3.10.0</version.spotless-maven-plugin>
+        <version.spotless-maven-plugin>3.10.1</version.spotless-maven-plugin>
 
         <!-- Configuration properties -->
         <skipFormatting>false</skipFormatting>
