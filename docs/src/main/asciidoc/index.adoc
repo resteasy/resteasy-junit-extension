@@ -31,7 +31,7 @@ Add the extension to your test dependencies:
 [source,xml]
 ----
 <dependency>
-    <groupId>dev.resteasy.junit</groupId>
+    <groupId>dev.resteasy.junit.extension</groupId>
     <artifactId>resteasy-junit-extension</artifactId>
     <version>{project.version}</version>
     <scope>test</scope>
@@ -82,7 +82,7 @@ For more complex scenarios, use a custom `Application` class:
 
 [source,java]
 ----
-@RestBootstrap(MyApplication.class)
+@RestBootstrap(application = MyApplication.class)
 public class HelloResourceTest {
 
     @RestResource
@@ -133,6 +133,10 @@ public class MyTest {
 
 This is ideal when you only need to test specific resources without custom Application configuration.
 
+Provider classes — filters, interceptors, exception mappers — can be listed here as well. Everything given to `value()`
+is added to the synthetic application's `getClasses()`, so no custom `Application` is needed just to register a
+provider.
+
 ==== Option 2: Application Class (Advanced Cases)
 
 For more control, specify a custom `Application` class:
@@ -148,7 +152,6 @@ public class MyTest {
 Use this when you need:
 
 * Custom `@ApplicationPath` configuration
-* Provider registration (filters, interceptors, exception mappers)
 * Custom application properties
 * Programmatic configuration in the Application class
 
@@ -211,7 +214,7 @@ NOTE: `UriBuilder` is only available for method/constructor parameters and does 
 
 [source,java]
 ----
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class InjectionExamplesTest {
 
     // Static field injection
@@ -251,7 +254,7 @@ Use `@RequestPath` to inject URIs or WebTargets pointing to specific paths:
 
 [source,java]
 ----
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class PathQualifiersTest {
 
     @RestResource
@@ -298,7 +301,7 @@ public class CustomTimeoutProvider implements RestClientBuilderProvider {
     }
 }
 
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class CustomClientTest {
 
     @RestResource
@@ -317,7 +320,7 @@ directly on the annotation instead of implementing a `RestClientBuilderProvider`
 
 [source,java]
 ----
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class ProviderTest {
 
     @RestResource
@@ -387,7 +390,7 @@ public class CustomPortProvider implements ConfigurationProvider {
     }
 }
 
-@RestBootstrap(value = MyApp.class, configFactory = CustomPortProvider.class)
+@RestBootstrap(value = MyResource.class, configFactory = CustomPortProvider.class)
 public class CustomPortTest {
     // Tests run on port 9090
     // Configuration parameters are ignored when configFactory is specified
@@ -476,7 +479,7 @@ public class SslTest {
     public void testWithKeyStoreApi() {
         try (Client client = ClientBuilder.newBuilder()
                 .keyStore(certificate.clientKeyStore(),
-                    SelfSignedCertificate.KEYSTORE_PASSWORD)
+                    certificate.keyStorePassword())
                 .trustStore(certificate.clientTrustStore())
                 .build()) {
             // Use client...
@@ -638,7 +641,7 @@ Nested test classes can inherit or override the parent's `@RestBootstrap`:
 
 [source,java]
 ----
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class OuterTest {
 
     @RestResource
@@ -646,7 +649,7 @@ public class OuterTest {
 
     @Test
     public void testOuter() {
-        // Uses MyApp on default port
+        // Uses MyResource on default port
     }
 
     @Nested
@@ -660,7 +663,7 @@ public class OuterTest {
     }
 
     @Nested
-    @RestBootstrap(value = MyApp.class, configFactory = SecondInstanceConfigurationProvider.class)
+    @RestBootstrap(value = MyResource.class, configFactory = SecondInstanceConfigurationProvider.class)
     class IsolatedTests {
         // Gets its own SeBootstrap instance with different config
 
@@ -709,7 +712,7 @@ com.example.DataSourceProducer
 
 [source,java]
 ----
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class DatabaseTest {
 
     @RestResource
@@ -782,7 +785,7 @@ public class TempFileProducer implements RestResourceProducer {
     }
 }
 
-@RestBootstrap(MyApp.class)
+@RestBootstrap(MyResource.class)
 public class FileProcessingTest {
 
     @Test
